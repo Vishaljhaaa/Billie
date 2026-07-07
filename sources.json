@@ -1,0 +1,30 @@
+{
+  "poll_interval_minutes": 60,
+  "chunk_size": 700,
+  "chunk_overlap": 100,
+  "top_k": 4,
+  "vector_store_dir": "./data/chroma",
+  "metadata_db_path": "./data/source_state.db",
+  "sources": [
+    {
+      "id": "company-handbook",
+      "type": "file",
+      "path": "./knowledge/company_handbook.txt"
+    },
+    {
+      "id": "product-updates",
+      "type": "file",
+      "path": "./knowledge/product_updates.txt"
+    },
+    {
+      "id": "security-playbook",
+      "type": "file",
+      "path": "./knowledge/security_playbook.txt"
+    },
+    {
+      "id": "python-news",
+      "type": "url",
+      "url": "https://www.python.org/blogs/"
+    }
+  ]
+}

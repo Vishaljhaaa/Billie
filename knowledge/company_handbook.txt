@@ -1,0 +1,6 @@
+The support chatbot should answer using trusted internal and public knowledge.
+
+When new source material is added, the ingestion system should detect the change,
+re-embed only the affected documents, and make the fresh content available for retrieval.
+
+If the chatbot is unsure, it should say so and cite the supporting snippets it used.

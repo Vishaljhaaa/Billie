@@ -1,0 +1,27 @@
+[
+  {
+    "question": "How does the chatbot learn about new information over time?",
+    "expected_source": "company-handbook",
+    "expected_keywords": ["detect", "change", "re-embed", "retrieval"]
+  },
+  {
+    "question": "Can the system refresh the knowledge base automatically as well as manually?",
+    "expected_source": "product-updates",
+    "expected_keywords": ["scheduled", "polling", "manually", "admin"]
+  },
+  {
+    "question": "What headers protect public chat access and admin operations?",
+    "expected_source": "security-playbook",
+    "expected_keywords": ["x-api-key", "x-admin-key"]
+  },
+  {
+    "question": "What happens if the language model is down?",
+    "expected_source": "security-playbook",
+    "expected_keywords": ["fallback", "retrieval-only"]
+  },
+  {
+    "question": "What operational data can users inspect from the service?",
+    "expected_source": "product-updates",
+    "expected_keywords": ["status", "indexed", "metrics"]
+  }
+]

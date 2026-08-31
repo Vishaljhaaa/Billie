@@ -14,7 +14,11 @@ $paths = @(
 foreach ($p in $paths) {
   if (Test-Path $p) {
     Write-Host "Removing $p from git index (keeps local files)..."
-    git rm -r --cached $p -q 2>$null || Write-Host "No tracked items under $p"
+    try {
+      git rm -r --cached $p -q 2>$null
+    } catch {
+      Write-Host "No tracked items under $p or command failed"
+    }
   }
 }
 

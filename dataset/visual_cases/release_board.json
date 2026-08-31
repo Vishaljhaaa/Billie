@@ -1,0 +1,14 @@
+{
+  "summary": "The release board says Asteria Notes enters public beta on August 12 with admin approval required.",
+  "evidence": [
+    "Asteria Notes public beta starts August 12",
+    "Admin approval is required for access"
+  ],
+  "entities": [
+    "Asteria Notes",
+    "August 12"
+  ],
+  "ocr_text": "Asteria Notes public beta August 12 admin approval required",
+  "ambiguities": [],
+  "confidence": 0.97
+}

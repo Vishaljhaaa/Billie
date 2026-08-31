@@ -1,0 +1,50 @@
+[
+  {
+    "id": "release-board-date",
+    "session_id": "release-thread",
+    "question": "When does the public beta start for Asteria Notes?",
+    "image_inputs": [
+      "dataset/visual_cases/release_board.png"
+    ],
+    "expected_keywords": [
+      "august 12",
+      "asteria notes"
+    ],
+    "expected_clarification": false
+  },
+  {
+    "id": "security-reporting",
+    "session_id": "security-thread",
+    "question": "Where should I report OTP phishing?",
+    "image_inputs": [
+      "dataset/visual_cases/security_alert.png"
+    ],
+    "expected_keywords": [
+      "security@company.test"
+    ],
+    "expected_clarification": false
+  },
+  {
+    "id": "security-memory-followup",
+    "session_id": "security-thread",
+    "question": "Can you repeat the reporting email?",
+    "image_inputs": [],
+    "expected_keywords": [
+      "security@company.test"
+    ],
+    "expected_clarification": false
+  },
+  {
+    "id": "ambiguous-launch-date",
+    "session_id": "ambiguous-thread",
+    "question": "What launch date is shown in the image?",
+    "image_inputs": [
+      "dataset/visual_cases/dual_schedule.png"
+    ],
+    "expected_keywords": [
+      "which item",
+      "interpretation"
+    ],
+    "expected_clarification": true
+  }
+]

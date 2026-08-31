@@ -1,0 +1,14 @@
+{
+  "summary": "The alert instructs employees to report OTP phishing to security@company.test.",
+  "evidence": [
+    "Suspicious OTP requests should be reported immediately",
+    "Reporting mailbox is security@company.test"
+  ],
+  "entities": [
+    "security@company.test",
+    "OTP phishing"
+  ],
+  "ocr_text": "Report OTP phishing to security@company.test",
+  "ambiguities": [],
+  "confidence": 0.98
+}

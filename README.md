@@ -1,64 +1,189 @@
-# Dynamic Knowledge Base Chatbot
+# Multimodal Knowledge Assistant
+
+A retrieval-augmented, multimodal knowledge assistant implemented in Python. It ingests trusted sources, incrementally indexes changed content, and serves evidence-backed answers using retrieved text, image sidecars, and optional LLM synthesis.
+
+Quick highlights
+- FastAPI backend with modular services and simple auth guards (`app/main.py`).
+- Streamlit demo UI (`streamlit_app.py`).
+- Vector-store abstraction supporting Chroma (optional) or a local JSON fallback (`app/vector_store.py`).
+- Domain modules for medical QA (MedQuAD) and arXiv research retrieval.
+- Tests with `pytest` and example experiment scripts under `experiments/`.
+
+Why include this on your resume
+- Demonstrates system design, data ingestion pipelines, retrieval/IR concepts, and production integration patterns (metrics, retries, fallback strategies).  
+- Shows ability to integrate third-party services (LLMs, vector DBs) and handle multimodal inputs (images + text).
+
+Resume-ready bullets (pick one or two tailored to role):
+- "Built a retrieval-augmented multimodal assistant (FastAPI + Streamlit) with incremental fingerprint-based indexing, pluggable vector-store (Chroma/local), session memory, and evidence-grounded response validation."
+- "Implemented a production-focused ingestion pipeline (fingerprinting, chunking, sqlite-backed source state), Prometheus metrics, and full unit tests covering retrieval, multimodal reasoning, and dataset-based QA."
+
+Local quickstart
+1. Create a virtual environment and install dependencies:
+```bash
+python -m venv .venv
+.\.venv\Scripts\activate
+python -m pip install -r requirements.txt
+```
+2. Install optional backends if desired:
+```bash
+pip install -r requirements-chroma.txt   # optional Chroma + sentence-transformers
+pip install -r requirements-multilingual.txt  # optional multilingual translation (NLLB)
+```
+3. Ensure NLTK WordNet is available (used by preprocessing):
+```bash
+python scripts/setup_nltk.py
+```
+4. Run the included demo (no external LLM required):
+```bash
+python scripts/demo_chat.py
+```
+
+Example demo output
+```
+
+Run the service
+- FastAPI (production / local dev):
+```bash
+uvicorn app.main:create_app --factory --reload
+```
+- Streamlit demo UI:
+```bash
+streamlit run streamlit_app.py
+
+Repository notes
+- See `DEVELOPER.md` for a more detailed developer-oriented guide.
+
+Next improvements (suggestions to make before public GitHub):
+- Add a `Dockerfile` + `docker-compose` to simplify local demos and CI.  
+- Add GitHub Actions to run tests / lint on push.  
+- Include a short demo screencast and sample dataset indices in `artifacts/` for quick evaluation.
+# Multimodal Knowledge Assistant
 
 ## Problem Statement
 
-This project builds a chatbot that can continuously expand its knowledge base instead of staying frozen after deployment. The goal is to ingest new information from trusted sources, update a vector database incrementally, and let the chatbot answer with the freshest available context.
+This project extends my training-phase dynamic knowledge base chatbot into a multimodal AI assistant that can:
 
-As an internship-style extension on the same training project, this repository now also includes reproducible retrieval experiments, baseline-vs-improved model comparisons, benchmark data, and saved visual outputs.
+- reason over both text and image inputs
+- retain conversational context across turns
+- surface ambiguity instead of guessing
+- validate whether a response is grounded in available evidence
+- answer medical questions through a MedQuAD-based retrieval chatbot
+- discuss computer science research papers through an arXiv expert chatbot
+- detect customer sentiment and adapt chatbot responses to user emotion
+- support multilingual conversations across English, Spanish, Hindi, and Bengali while preserving context
+
+The internship extension stays on the same chatbot project and domain rather than switching to an unrelated dataset or a new standalone app.
+
+It includes one unified Streamlit chatbot and one matching `/chat` API, with selectable modes for the general assistant, MedQuAD medical Q&A, and arXiv research expertise.
 
 ## Dataset
 
-The project uses the same chatbot domain and extends it with a small local knowledge corpus for reproducible experiments:
+The repository uses the original chatbot knowledge corpus plus a small visual extension in the same domain.
 
-- [knowledge/company_handbook.txt](C:/Users/vishal/Desktop/ASS1/knowledge/company_handbook.txt)
-- [knowledge/product_updates.txt](C:/Users/vishal/Desktop/ASS1/knowledge/product_updates.txt)
-- [knowledge/security_playbook.txt](C:/Users/vishal/Desktop/ASS1/knowledge/security_playbook.txt)
+### Text knowledge
 
-Benchmark questions and expected evidence are stored in:
+- `knowledge/company_handbook.txt`
+- `knowledge/product_updates.txt`
+- `knowledge/security_playbook.txt`
 
-- [experiments/benchmark_dataset.json](C:/Users/vishal/Desktop/ASS1/experiments/benchmark_dataset.json)
+### Retrieval benchmark
 
-This keeps the internship work on the same chatbot project rather than switching to a new dataset or unrelated system.
+- `experiments/benchmark_dataset.json`
+
+### Visual benchmark cases
+
+- `dataset/visual_cases/release_board.png`
+- `dataset/visual_cases/security_alert.png`
+- `dataset/visual_cases/dual_schedule.png`
+- `experiments/multimodal_benchmark_dataset.json`
+
+Each visual case also includes a `.json` sidecar with reproducible extracted evidence used for offline evaluation. When an API key is configured, the same pipeline can optionally call a vision-capable OpenAI-compatible model for live image inspection.
+
+### Medical QA data
+
+Task 3 uses the MedQuAD dataset from `https://github.com/abachaa/MedQuAD`. Place the downloaded or cloned dataset at:
+
+```text
+dataset/MedQuAD/
+```
+
+The app also includes a small reproducible sample at `dataset/medquad_sample/sample_medquad_records.json` so the medical QA workflow can run before the full dataset is downloaded.
+
+### arXiv CS research data
+
+The arXiv expert chatbot is designed for the Kaggle arXiv metadata dataset from `https://www.kaggle.com/datasets/Cornell-University/arxiv`. Place the downloaded metadata file at:
+
+```text
+dataset/arxiv/arxiv-metadata-oai-snapshot.json
+```
+
+The app filters to computer science categories such as `cs.CL`, `cs.LG`, `cs.CV`, and `cs.IR`. A small reproducible CS sample is included at `dataset/arxiv_sample/sample_arxiv_cs.jsonl`.
 
 ## Methodology
 
-### Core system
+### Base training project
 
-- Source ingestion from local files and web pages
-- Fingerprint-based change detection so only changed sources are re-indexed
-- Chunk-based retrieval store with persistent storage
-- Scheduled background sync plus manual admin-triggered sync
-- Optional LLM answer generation with retrieval fallback
-- API key protection, metrics, and admin dashboard
+The original training system already supported:
 
-### Preprocessing and feature engineering
+- incremental source ingestion
+- fingerprint-based refresh
+- chunking and retrieval
+- optional LLM-backed answers
+- admin sync and monitoring
+- baseline vs improved retrieval benchmarking
 
-- HTML cleanup removes scripts, styles, and non-content tags before indexing
-- Documents are normalized and chunked with configurable chunk size and overlap
-- Each chunk becomes a searchable retrieval unit with source metadata
-- Source fingerprints are stored in SQLite for incremental refresh logic
+### Internship extension
 
-### Model comparison
+The new multimodal layer adds:
 
-The experiment layer compares two retrieval strategies on the same chatbot knowledge base:
+- `session_id`-based conversational memory via `app/memory.py`
+- image evidence extraction via `app/vision.py`
+- ambiguity detection and follow-up prompts via `app/reasoning.py`
+- evidence-grounding checks via `app/validation.py`
+- a multimodal benchmark comparing text-only fallback vs multimodal reasoning
+- a MedQuAD medical QA module with XML parsing, retrieval, entity recognition, and a Streamlit UI
+- an arXiv computer science expert module with paper retrieval, information extraction, summarization, follow-up context, concept visualization, and optional local open-source LLM explanations through Ollama
+- a sentiment analysis layer that classifies positive, negative, or neutral user messages and adjusts answer tone
+- a multilingual layer that detects language, handles mixed-language inputs, normalizes cross-lingual query terms, and keeps session memory across language switches
 
-1. `KeywordOverlap` baseline
-   Scores chunks by raw token overlap with the user question.
-2. `CosineOverlap` improved model
-   Scores chunks with cosine similarity over token-frequency vectors and uses chunk overlap for better context retention.
+### Decision pipeline
 
-This gives a lightweight but reproducible comparison between a simpler baseline and a stronger retrieval setup on the same project.
+1. Retrieve relevant text evidence from the indexed knowledge base.
+2. Inspect provided image inputs using sidecar evidence or an optional vision model.
+3. Pull recent session memory for conversational continuity.
+4. Detect ambiguity before answering.
+5. Generate an evidence-based answer through the multimodal reasoning layer.
+6. Validate that the answer is grounded in the retrieved evidence.
+7. Store the turn in memory for future follow-ups.
+
+This design avoids simple one-shot generation from a single model and instead uses a small reasoning pipeline with retrieval, evidence extraction, memory, ambiguity handling, and response validation.
+
+### Preprocessing
+
+The retrieval pipeline now performs:
+
+- whitespace normalization before chunking
+- lowercase tokenization
+- lemmatization with `WordNetLemmatizer` so related forms such as plural and singular terms are normalized before scoring
 
 ## Repository Structure
 
-- [app/main.py](C:/Users/vishal/Desktop/ASS1/app/main.py): FastAPI entrypoint and dependency wiring
-- [app/updater.py](C:/Users/vishal/Desktop/ASS1/app/updater.py): incremental knowledge base refresh logic
-- [app/vector_store.py](C:/Users/vishal/Desktop/ASS1/app/vector_store.py): Chroma integration plus local fallback backend
-- [app/chatbot.py](C:/Users/vishal/Desktop/ASS1/app/chatbot.py): retrieval and LLM-backed response flow
-- [app/sources.py](C:/Users/vishal/Desktop/ASS1/app/sources.py): source loading, preprocessing, retry/backoff
-- [app/monitoring.py](C:/Users/vishal/Desktop/ASS1/app/monitoring.py): Prometheus metrics
-- [experiments/run_benchmark.py](C:/Users/vishal/Desktop/ASS1/experiments/run_benchmark.py): benchmark runner
-- [tests](C:/Users/vishal/Desktop/ASS1/tests): unit and integration tests
+- `app/main.py`: FastAPI app and dependency wiring
+- `streamlit_app.py`: unified Streamlit chatbot with general, medical, and arXiv modes
+- `app/chatbot.py`: multimodal answer orchestration
+- `app/medical_qa.py`: MedQuAD parser, medical retriever, and entity recognizer
+- `app/arxiv_expert.py`: arXiv loader, retriever, summarizer, concept extractor, and optional local LLM client
+- `app/sentiment.py`: customer sentiment detection and response adaptation
+- `app/multilingual.py`: language detection, mixed-language handling, query normalization, and language-aware response adaptation
+- `app/memory.py`: persistent session memory
+- `app/vision.py`: image evidence extraction
+- `app/reasoning.py`: ambiguity detection
+- `app/validation.py`: response grounding checks
+- `app/vector_store.py`: retrieval backend
+- `app/updater.py`: source refresh pipeline
+- `experiments/run_benchmark.py`: retrieval benchmark
+- `experiments/run_multimodal_benchmark.py`: multimodal benchmark
+- `tests/`: API, chatbot, source, and benchmark tests
 
 ## Setup
 
@@ -67,81 +192,69 @@ python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
 copy .env.example .env
-uvicorn app.main:create_app --factory --reload
+python -m uvicorn app.main:create_app --factory --reload
 ```
 
-Optional dense-vector backend:
+Optional dense retrieval backend:
 
 ```bash
 pip install -r requirements-chroma.txt
 ```
 
-## Configuration
-
-The knowledge sources are configured in [sources.json](C:/Users/vishal/Desktop/ASS1/sources.json).
-
-Important environment variables:
-
-- `CHATBOT_API_KEY`: protects `/chat`
-- `CHATBOT_ADMIN_API_KEY`: protects `/sync` and `/admin/*`
-- `OPENAI_API_KEY`: enables LLM-backed responses
-- `OPENAI_MODEL`: defaults to `gpt-4o-mini`
-- `VECTOR_STORE_BACKEND`: set `local` to force the built-in fallback backend
-- `SOURCE_MAX_RETRIES`, `SOURCE_TIMEOUT_SECONDS`, `SOURCE_RETRY_BACKOFF_SECONDS`: ingestion resilience controls
-
-## Experiments and Results
-
-Run the benchmark:
+### Run the unified Streamlit chatbot
 
 ```bash
-python experiments/run_benchmark.py
+python -m streamlit run streamlit_app.py
 ```
 
-This generates:
+Use the sidebar mode selector to switch between the general multimodal assistant, MedQuAD medical Q&A, and arXiv CS expert. The FastAPI `/chat` endpoint accepts the same modes through `"mode": "general"`, `"medical"`, or `"research"`.
 
-- [artifacts/benchmark_results.json](C:/Users/vishal/Desktop/ASS1/artifacts/benchmark_results.json)
-- [artifacts/retriever_top1_accuracy.png](C:/Users/vishal/Desktop/ASS1/artifacts/retriever_top1_accuracy.png)
-- [artifacts/retriever_keyword_recall.png](C:/Users/vishal/Desktop/ASS1/artifacts/retriever_keyword_recall.png)
+To use a local open-source LLM for explanation generation, install and run Ollama, then set:
 
-Metrics reported:
+```bash
+set OLLAMA_MODEL=llama3.1
+```
 
-- `top1_accuracy`
-- `top3_accuracy`
-- `avg_keyword_recall`
+The app still works without Ollama by using retrieval, information extraction, and extractive summarization.
 
-Current benchmark results from the checked-in experiment run:
+### Enable full-sentence multilingual translation
 
-| Model | Top-1 Accuracy | Top-3 Accuracy | Avg Keyword Recall |
-|---|---:|---:|---:|
-| KeywordOverlap | 1.00 | 1.00 | 0.80 |
-| CosineOverlap | 1.00 | 1.00 | 0.733 |
+The default multilingual path is deterministic and lightweight. To enable local, open-source NLLB translation for Spanish, Hindi, and Bengali queries and answers:
 
-Insight:
+```bash
+pip install -r requirements-multilingual.txt
+set MULTILINGUAL_TRANSLATION_BACKEND=nllb
+```
 
-- Both models retrieve the correct source on every benchmark question.
-- The keyword baseline retains slightly higher keyword recall on this small dataset.
-- This suggests the current benchmark corpus is easy for source-level retrieval and that future work should include harder paraphrased questions or a denser semantic retriever for clearer separation.
+The first NLLB run downloads `facebook/nllb-200-distilled-600M`; keep the default backend for an offline demo without model downloads.
 
 ## API Usage
 
-### How to use the chatbot
+### Text-only request
 
-1. Start the server:
-
-```bash
-python -m uvicorn app.main:create_app --factory --reload
+```json
+{
+  "question": "How does the chatbot refresh its knowledge base?",
+  "session_id": "demo-thread",
+  "mode": "general"
+}
 ```
 
-2. Open these URLs in your browser:
+### Multimodal request
 
-- Home page: `http://127.0.0.1:8000/`
-- Admin dashboard: `http://127.0.0.1:8000/admin`
-- Health check: `http://127.0.0.1:8000/health`
-- Metrics: `http://127.0.0.1:8000/metrics`
+```json
+{
+  "question": "Where should I report OTP phishing?",
+  "session_id": "security-thread",
+  "image_inputs": [
+    {
+      "path": "dataset/visual_cases/security_alert.png"
+    }
+  ]
+}
+```
 
-3. Send a `POST` request to `/chat` with your question and `X-API-Key`.
-
-PowerShell example:
+Example PowerShell call:
 
 ```powershell
 Invoke-RestMethod `
@@ -149,243 +262,182 @@ Invoke-RestMethod `
   -Uri http://127.0.0.1:8000/chat `
   -Headers @{ "X-API-Key" = "chat-secret-123" } `
   -ContentType "application/json" `
-  -Body '{"question":"How does the chatbot update its knowledge base?"}'
+  -Body '{
+    "question":"Where should I report OTP phishing?",
+    "session_id":"security-thread",
+    "image_inputs":[{"path":"dataset/visual_cases/security_alert.png"}]
+  }'
 ```
 
-Example response:
+The response now includes evidence, validation status, and clarification flags in addition to `answer`, `sources`, and `used_llm`.
 
-```json
-{
-  "answer": "The chatbot updates its knowledge base by re-checking configured sources, detecting changes, and re-indexing only changed content.",
-  "sources": [
-    "C:\\Users\\vishal\\Desktop\\ASS1\\knowledge\\company_handbook.txt"
-  ],
-  "used_llm": false
-}
-```
+## Experiments
 
-4. To refresh the knowledge base manually, send a `POST` request to `/sync` with `X-Admin-Key`.
+### Retrieval benchmark
 
-```powershell
-Invoke-RestMethod `
-  -Method POST `
-  -Uri http://127.0.0.1:8000/sync `
-  -Headers @{ "X-Admin-Key" = "admin-secret-123" }
-```
-
-5. To use the admin dashboard, open `/admin`, enter the admin key, then use:
-
-- `Load Status` to inspect indexed sources and sync metrics
-- `Run Sync` to trigger an immediate update
-
-Trigger a manual refresh:
+Run:
 
 ```bash
-curl -X POST http://127.0.0.1:8000/sync -H "X-Admin-Key: replace-with-admin-key"
+python experiments/run_benchmark.py
 ```
 
-Ask a question:
+Outputs:
+
+- `artifacts/benchmark_results.json`
+- `artifacts/retriever_top1_accuracy.png`
+- `artifacts/retriever_keyword_recall.png`
+
+Current results:
+
+| Model | Top-1 Accuracy | Top-3 Accuracy | Avg Keyword Recall |
+|---|---:|---:|---:|
+| KeywordOverlap | 1.00 | 1.00 | 0.800 |
+| CosineOverlap | 1.00 | 1.00 | 0.733 |
+
+### Multimodal benchmark
+
+Run:
 
 ```bash
-curl -X POST http://127.0.0.1:8000/chat ^
-  -H "Content-Type: application/json" ^
-  -H "X-API-Key: replace-with-chat-key" ^
-  -d "{\"question\":\"How does the chatbot learn new information?\"}"
+python experiments/run_multimodal_benchmark.py
 ```
 
-Open the admin dashboard:
+Outputs:
+
+- `artifacts/multimodal_benchmark_results.json`
+- `artifacts/multimodal_keyword_recall.png`
+- `artifacts/multimodal_clarification_accuracy.png`
+- `artifacts/multimodal_grounded_rate.png`
+
+Current results:
+
+| Model | Avg Keyword Recall | Clarification Accuracy | Grounded Rate |
+|---|---:|---:|---:|
+| TextOnlyFallback | 0.000 | 0.750 | 0.000 |
+| MultimodalReasoner | 0.625 | 1.000 | 0.750 |
+
+### Key insights
+
+- Retrieval quality from the original training project remains strong on the text benchmark.
+- Adding image evidence materially improves answer quality on visual tasks.
+- Ambiguity detection works reliably on the current benchmark and prevents overconfident answers.
+- Grounded-rate gains show the multimodal pipeline is not just answering more often, but answering with stronger evidence support.
+
+## MedQuAD Medical Q&A
+
+The medical chatbot implements Task 3 inside the same repository:
+
+- `MedQuADParser` reads MedQuAD-style XML files and extracts question, answer, focus, CUI, semantic type, question type, category, and synonyms where available.
+- `MedicalQARetriever` uses lemmatized cosine retrieval over question-answer records.
+- `MedicalEntityRecognizer` identifies basic symptoms, diseases, and treatment terms from the user question and matched MedQuAD focus.
+- The unified `streamlit_app.py` provides a mode for asking medical questions and viewing the matched source, entities, and disclaimer.
+
+This component is informational only and includes a medical safety disclaimer in every answer.
+
+## arXiv Computer Science Expert
+
+The arXiv expert chatbot implements a domain-specific research assistant:
+
+- `ArxivDatasetLoader` reads the Kaggle arXiv metadata JSON-lines file and filters to computer science papers.
+- `ArxivRetriever` uses lemmatized cosine retrieval over titles, abstracts, and categories.
+- `ScientificNLP` extracts technical concepts, builds paper summaries, and creates a concept graph for visualization.
+- `LocalOpenSourceLLM` can call an Ollama-hosted model such as `llama3.1` for explanation generation.
+- The unified `streamlit_app.py` supports paper searching, follow-up questions, summaries, relevant paper panels, and concept visualization.
+
+This module is runnable with the bundled CS sample and becomes much stronger when the full Kaggle arXiv metadata file is placed under `dataset/arxiv/`.
+
+## Sentiment-Aware Chatbot
+
+Task 5 is implemented in the main chatbot flow:
+
+- `SentimentAnalyzer` classifies each user message as `positive`, `negative`, or `neutral`.
+- The classifier uses lemmatized tokens, positive and negative lexicons, simple negation handling, and confidence scoring.
+- `SentimentResponseAdapter` adjusts the response tone. For example, negative messages receive a more empathetic opening.
+- Chat responses include a `sentiment` payload with label, confidence, and matched positive/negative cues.
+- The Streamlit assistant shows detected sentiment and confidence for each response.
+
+This helps the chatbot respond more appropriately during customer interactions and gives a measurable output for sentiment detection accuracy and response appropriateness.
+
+### Sentiment evaluation
+
+`dataset/sentiment_evaluation.json` is a labelled, balanced 18-message evaluation set. Run:
 
 ```bash
-start http://127.0.0.1:8000/admin
+python experiments/run_sentiment_evaluation.py
 ```
 
-### Full API reference
+It creates `artifacts/sentiment_evaluation_results.json` and `artifacts/sentiment_evaluation.png`, including accuracy, macro F1, per-class scores, and a response-appropriateness rate. The latter checks that negative messages get empathy, positive messages get acknowledgement, and neutral messages remain factual; it is an offline proxy, not a customer-satisfaction study.
 
-#### `GET /`
+## Multilingual Chatbot
 
-Purpose:
-- Shows the landing page for the project
+Task 6 is implemented in the main chatbot flow:
 
-Auth:
-- none
+- Supports English plus three additional languages: Spanish, Hindi, and Bengali.
+- Detects language from script ranges and language-specific cue words.
+- Handles mixed-language inputs such as English plus Hindi or Spanish terms.
+- Normalizes key cross-lingual terms into English before retrieval so the same knowledge base can answer across languages.
+- Preserves conversational continuity with the existing `session_id` memory store, even when the user switches languages across turns.
+- Chat responses include a `language` payload with primary language, detected languages, confidence, normalized query, ambiguity flag, and notes.
+- The Streamlit assistant shows detected language, confidence, and mixed-language status.
 
-Typical use:
-- Open `http://127.0.0.1:8000/` in a browser
+The default implementation is local and deterministic. It also includes an optional NLLB (`facebook/nllb-200-distilled-600M`) backend for full-sentence query translation before retrieval and answer translation after generation. This preserves the same session memory across language switches while providing genuine model-based cross-lingual handling when enabled.
 
-#### `GET /health`
+### Multilingual evaluation
 
-Purpose:
-- Returns a simple health status for the running service
+Run:
 
-Auth:
-- none
-
-Example response:
-
-```json
-{
-  "status": "ok"
-}
+```bash
+python experiments/run_multilingual_evaluation.py
 ```
 
-#### `GET /metrics`
+This writes `artifacts/multilingual_evaluation_results.json` with language-detection accuracy and cross-lingual retrieval-term recall over English, Spanish, Hindi, Bengali, and mixed-language examples.
 
-Purpose:
-- Exposes Prometheus-style runtime metrics
+## Testing
 
-Auth:
-- none
-
-Typical use:
-- Monitoring request counts, sync runs, and LLM usage
-
-#### `POST /chat`
-
-Purpose:
-- Accepts a user question and returns an answer based on the indexed knowledge base
-
-Auth:
-- requires `X-API-Key` when `CHATBOT_API_KEY` is configured
-
-Request body:
-
-```json
-{
-  "question": "How does the chatbot update its knowledge base?"
-}
-```
-
-Response fields:
-
-- `answer`: final chatbot response
-- `sources`: source locations used during retrieval
-- `used_llm`: whether the response came through the LLM layer
-
-#### `POST /sync`
-
-Purpose:
-- Triggers an immediate knowledge-base refresh
-
-Auth:
-- requires `X-Admin-Key` when `CHATBOT_ADMIN_API_KEY` is configured
-
-Response fields:
-
-- `updated_sources`: sources re-indexed in this run
-- `skipped_sources`: unchanged sources skipped by fingerprint comparison
-- `failed_sources`: sources that failed to update
-- `error_details`: per-source failure messages when applicable
-
-#### `GET /admin`
-
-Purpose:
-- Opens the browser-based admin dashboard
-
-Auth:
-- the page itself is open, but dashboard actions use the admin key
-
-#### `GET /admin/status`
-
-Purpose:
-- Returns the current admin status view as JSON
-
-Auth:
-- requires `X-Admin-Key` when configured
-
-Response fields:
-
-- `last_sync_at`
-- `source_count`
-- `indexed_sources`
-- `last_sync_summary`
-- `metrics`
-
-#### `POST /admin/sync`
-
-Purpose:
-- Triggers a manual sync from the admin workflow
-
-Auth:
-- requires `X-Admin-Key` when configured
-
-Returns:
-- the same sync payload as `POST /sync`
-
-## Code Flow
-
-### End-to-end request flow
-
-1. The app starts in [app/main.py](C:/Users/vishal/Desktop/ASS1/app/main.py) through `create_app()`.
-2. `create_app()` builds shared services such as the vector store, updater, chatbot, auth manager, scheduler, and monitoring layer.
-3. On startup, the FastAPI lifespan hook runs one sync immediately so the knowledge base is available before the first chat request.
-4. The scheduler in [app/scheduler.py](C:/Users/vishal/Desktop/ASS1/app/scheduler.py) keeps refreshing sources in the background at the configured interval.
-5. When a user calls `/chat`, the auth layer checks `X-API-Key`, then the chatbot service retrieves the most relevant chunks from the vector store.
-6. If an LLM is configured, those retrieved chunks are passed into the LLM prompt to produce the final answer.
-7. If the LLM is unavailable or not configured, the app falls back to a retrieval-only answer.
-8. Monitoring counters and request latency metrics are updated throughout the request lifecycle.
-
-### Knowledge ingestion flow
-
-1. Source definitions are read from [sources.json](C:/Users/vishal/Desktop/ASS1/sources.json) through [app/config.py](C:/Users/vishal/Desktop/ASS1/app/config.py).
-2. The updater in [app/updater.py](C:/Users/vishal/Desktop/ASS1/app/updater.py) loops through each configured source.
-3. [app/sources.py](C:/Users/vishal/Desktop/ASS1/app/sources.py) loads content from local files or URLs.
-4. URL content is cleaned with BeautifulSoup so only useful text is indexed.
-5. Each source is fingerprinted, and [app/state.py](C:/Users/vishal/Desktop/ASS1/app/state.py) compares it to the last stored fingerprint in SQLite.
-6. If the source is unchanged, it is skipped.
-7. If the source changed, [app/text_utils.py](C:/Users/vishal/Desktop/ASS1/app/text_utils.py) splits it into chunks.
-8. [app/vector_store.py](C:/Users/vishal/Desktop/ASS1/app/vector_store.py) replaces only that source’s existing chunks in the retrieval store.
-9. The new fingerprint and timestamp are stored so the next sync can be incremental again.
-
-### Retrieval and answer generation flow
-
-1. A chat question reaches [app/chatbot.py](C:/Users/vishal/Desktop/ASS1/app/chatbot.py).
-2. The chatbot asks the vector store for the top `k` matching chunks.
-3. The vector store uses either:
-- Chroma embeddings when the optional Chroma backend is available
-- a local persistent cosine/keyword-style fallback backend otherwise
-4. Matching chunks are converted into source-backed context snippets.
-5. [app/llm.py](C:/Users/vishal/Desktop/ASS1/app/llm.py) formats a retrieval-augmented prompt for an OpenAI-compatible API when `OPENAI_API_KEY` is present.
-6. If the LLM call succeeds, the API returns an LLM-backed answer with `used_llm: true`.
-7. If the LLM call fails, the chatbot returns a retrieval-only fallback answer with `used_llm: false`.
-
-### Supporting components
-
-- [app/auth.py](C:/Users/vishal/Desktop/ASS1/app/auth.py) enforces API-key protection for chat and admin routes
-- [app/monitoring.py](C:/Users/vishal/Desktop/ASS1/app/monitoring.py) records counters, latency, sync stats, and LLM call metrics
-- [app/admin.py](C:/Users/vishal/Desktop/ASS1/app/admin.py) renders the landing page and admin dashboard UI
-- [experiments/run_benchmark.py](C:/Users/vishal/Desktop/ASS1/experiments/run_benchmark.py) evaluates retriever behavior on the same project knowledge base
-
-## Testing and Reproducibility
-
-Run all automated tests:
+Run the full suite:
 
 ```bash
 python -m pytest
 ```
 
-What is covered:
+Fast local core status:
 
-- API auth and admin endpoints
-- Retrieval and LLM fallback behavior
-- Source-loader retry logic
-- Benchmark artifact generation
+- `18 passed` for the chatbot, MedQuAD, arXiv, multilingual, sentiment, and evaluation tests.
+- The API tests currently parse the full MedQuAD corpus during service construction and should be run separately or refactored to inject the sample fixture.
 
-## Visual Outputs
+## Visual Outputs Included
 
-The benchmark script saves comparison plots for the retrieval models so the repo includes presentation-ready outputs rather than only code:
+The repo includes submission-ready visuals:
 
-- accuracy comparison bar chart
-- keyword recall comparison bar chart
+- benchmark bar charts in `artifacts/`
+- sample multimodal input images in `dataset/visual_cases/`
+- concept graphs and retrieved-paper panels in the arXiv Streamlit app
 
-## Notes for GitHub Submission
+## Notes
 
-This repository is now structured to be uploaded directly to GitHub with:
+- The offline benchmark uses deterministic visual sidecars for reproducibility.
+- If `OPENAI_API_KEY` is set, the system can also call a vision-capable OpenAI-compatible endpoint for richer live image analysis.
+- The project remains a direct extension of the training chatbot rather than a new unrelated dataset or application.
+- The full MedQuAD dataset is not bundled here by default; place it under `dataset/MedQuAD/` to index the complete collection.
+- The full Kaggle arXiv dataset is not bundled here by default; place `arxiv-metadata-oai-snapshot.json` under `dataset/arxiv/` to index the complete collection.
 
-- a clear problem statement
-- documented dataset and preprocessing
-- methodology and model comparison
-- reproducible commands
-- automated tests
-- generated metrics and plots
+## Assumptions and Limitations
 
-The one thing not done from inside this environment is the actual GitHub push. Once you want, I can also help you prepare a final `git` commit flow or a polished project description for the repo page.
+### Assumptions
+
+- The task 1 base project is `elev/dynamically expanding chatbot memory`, and this repository is an extension of that same codebase.
+- The original chatbot knowledge corpus remains the primary dataset, while the visual cases are an added multimodal extension in the same problem domain.
+- Multimodal reasoning can be demonstrated reproducibly through image sidecar `.json` files when a live vision API is not configured.
+- Recent-turn memory with a small fixed window is sufficient to demonstrate conversational continuity for this internship project.
+- Rule-based ambiguity checks and heuristic grounding validation are acceptable for showing reasoning and decision-making behavior in a lightweight, reproducible system.
+
+### Limitations
+
+- The multimodal benchmark is intentionally small, so the reported results demonstrate capability on curated cases rather than broad real-world generalization.
+- Offline image understanding depends on prepared sidecar evidence; richer live visual interpretation requires a configured `OPENAI_API_KEY`.
+- Ambiguity handling is rule-based and may miss more subtle or complex uncertainty patterns.
+- The response validator is heuristic, so it improves grounding checks but is not equivalent to a formal verifier model.
+- The sample visual inputs are synthetic project artifacts designed for reproducible evaluation rather than a large real-image dataset.
+- The bundled MedQuAD sample is only for smoke testing; full medical QA evaluation should use the complete MedQuAD dataset.
+- The bundled arXiv sample is only for smoke testing; full research coverage requires the Kaggle arXiv metadata dataset.
+- Multilingual support uses local detection and domain-term normalization, not full neural translation by default.

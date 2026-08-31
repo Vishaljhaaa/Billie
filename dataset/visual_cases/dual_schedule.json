@@ -1,0 +1,18 @@
+{
+  "summary": "The image shows two different launch schedules: Asteria Notes on August 12 and Lumen Dashboard on August 19.",
+  "evidence": [
+    "Asteria Notes public beta starts August 12",
+    "Lumen Dashboard pilot starts August 19"
+  ],
+  "entities": [
+    "Asteria Notes",
+    "Lumen Dashboard",
+    "August 12",
+    "August 19"
+  ],
+  "ocr_text": "Asteria Notes August 12 Lumen Dashboard August 19",
+  "ambiguities": [
+    "The image contains multiple launch dates for different products."
+  ],
+  "confidence": 0.95
+}

@@ -1,3 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+env/
+venv/
+
+# Data and artifacts (ignored from git — keep locally or publish separately)
+/data/
+/artifacts/
+/dataset/arxiv/arxiv-metadata-oai-snapshot.json
+/dataset/MedQuAD/
+
+# Chroma local store and sqlite state
+data/chroma/
+*.sqlite3
+*.db
+
+# Logs
+.log
+
+# Package distributions
+dist/
+build/
+*.egg-info/
+
+# OS files
+.DS_Store
+Thumbs.db
 .env
 .pytest_cache/
 __pycache__/

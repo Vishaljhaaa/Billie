@@ -14,6 +14,15 @@ class AppMonitor:
         self._snapshot = {
             "http_requests": 0,
             "chat_requests": 0,
+            "image_requests": 0,
+            "clarifications_requested": 0,
+            "positive_sentiment": 0,
+            "neutral_sentiment": 0,
+            "negative_sentiment": 0,
+            "english_language": 0,
+            "spanish_language": 0,
+            "hindi_language": 0,
+            "bengali_language": 0,
             "sync_runs": 0,
             "sync_failures": 0,
             "llm_calls": 0,
@@ -69,6 +78,27 @@ class AppMonitor:
     def record_chat(self) -> None:
         with self._lock:
             self._snapshot["chat_requests"] += 1
+
+    def record_image_chat(self, image_count: int) -> None:
+        with self._lock:
+            self._snapshot["image_requests"] += image_count
+
+    def record_clarification(self) -> None:
+        with self._lock:
+            self._snapshot["clarifications_requested"] += 1
+
+    def record_sentiment(self, label: str) -> None:
+        key = f"{label}_sentiment"
+        with self._lock:
+            if key in self._snapshot:
+                self._snapshot[key] += 1
+
+    def record_language(self, language_code: str) -> None:
+        names = {"en": "english", "es": "spanish", "hi": "hindi", "bn": "bengali"}
+        key = f"{names.get(language_code, 'english')}_language"
+        with self._lock:
+            if key in self._snapshot:
+                self._snapshot[key] += 1
 
     def record_sync(self, failed_count: int) -> None:
         self.sync_counter.inc()

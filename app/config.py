@@ -43,8 +43,10 @@ class AppConfig:
     chunk_size: int
     chunk_overlap: int
     top_k: int
+    memory_window: int
     vector_store_dir: Path
     metadata_db_path: Path
+    session_store_path: Path
     source_timeout_seconds: float
     source_max_retries: int
     source_retry_backoff_seconds: float
@@ -72,8 +74,10 @@ class AppConfig:
             chunk_size=payload["chunk_size"],
             chunk_overlap=payload["chunk_overlap"],
             top_k=payload["top_k"],
+            memory_window=payload.get("memory_window", 4),
             vector_store_dir=(root / payload["vector_store_dir"]).resolve(),
             metadata_db_path=(root / payload["metadata_db_path"]).resolve(),
+            session_store_path=(root / payload.get("session_store_path", "data/session_memory.json")).resolve(),
             source_timeout_seconds=float(os.getenv("SOURCE_TIMEOUT_SECONDS", "20")),
             source_max_retries=int(os.getenv("SOURCE_MAX_RETRIES", "3")),
             source_retry_backoff_seconds=float(os.getenv("SOURCE_RETRY_BACKOFF_SECONDS", "1.5")),

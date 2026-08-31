@@ -1,0 +1,7 @@
+Security Playbook
+
+The public chat endpoint can be protected with an API key passed through the X-API-Key header.
+Administrative actions such as manual synchronization and status inspection can be protected with a separate X-Admin-Key header.
+
+When source fetching fails, the ingestion service retries the request before marking the source as failed.
+If the language model is unavailable, the chatbot falls back to retrieval-only answers instead of returning an error.

@@ -3,15 +3,15 @@ from __future__ import annotations
 import json
 import math
 import os
-import re
 from pathlib import Path
 from typing import Any
 
 from app.config import AppConfig
+from app.preprocessing import tokenize_and_lemmatize
 
 
 def _tokenize(text: str) -> list[str]:
-    return re.findall(r"[a-z0-9]+", text.lower())
+    return tokenize_and_lemmatize(text)
 
 
 class _LocalPersistentVectorStore:
@@ -59,6 +59,7 @@ class _LocalPersistentVectorStore:
         return [
             {
                 "content": record["content"],
+                "_score": score,
                 "metadata": {
                     "location": record["location"],
                     "source_id": record["source_id"],
@@ -129,9 +130,16 @@ class VectorStore:
             result = self._store.query(query_texts=[query], n_results=top_k)
             documents = result.get("documents", [[]])[0]
             metadatas = result.get("metadatas", [[]])[0]
+            distances = result.get("distances", [[]])[0] or [0.0] * len(documents)
             return [
-                {"content": document, "metadata": metadata}
-                for document, metadata in zip(documents, metadatas, strict=False)
+                {
+                    "content": document,
+                    "metadata": metadata,
+                    # Chroma's standard distance is cosine distance; retain a
+                    # normalized similarity for the relevance guard.
+                    "_score": max(0.0, 1.0 - float(distance)),
+                }
+                for document, metadata, distance in zip(documents, metadatas, distances, strict=False)
             ]
 
         return self._store.search(query, top_k)

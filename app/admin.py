@@ -8,7 +8,7 @@ def render_home_page() -> str:
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Dynamic Knowledge Base Chatbot</title>
+  <title>Multimodal Knowledge Assistant</title>
   <style>
     :root {
       --bg: #f4ede3;
@@ -109,11 +109,11 @@ def render_home_page() -> str:
   <main>
     <section class="hero">
       <div class="eyebrow">Training Project Extension</div>
-      <h1>Dynamic Knowledge Base Chatbot</h1>
+      <h1>Multimodal Knowledge Assistant</h1>
       <p>
         This service ingests trusted sources, detects updates, refreshes its retrieval index,
-        and serves chatbot answers using the latest indexed knowledge. It also includes an
-        evaluation layer with benchmark results and visual outputs for reproducible project submission.
+        and serves evidence-based answers using retrieved text, visual inputs, and conversational memory.
+        It also includes retrieval and multimodal benchmark results with saved visual outputs for reproducible submission.
       </p>
       <div class="actions">
         <a class="button" href="/admin">Open Admin Dashboard</a>
@@ -126,25 +126,25 @@ def render_home_page() -> str:
         <h3>API Endpoints</h3>
         <ul>
           <li><code>GET /health</code> for service status</li>
-          <li><code>POST /chat</code> for question answering</li>
+          <li><code>POST /chat</code> for multimodal question answering</li>
           <li><code>POST /sync</code> for manual knowledge-base refresh</li>
           <li><code>GET /admin/status</code> for indexed-source visibility</li>
         </ul>
       </div>
       <div class="panel">
-        <h3>Knowledge Features</h3>
+        <h3>Reasoning Features</h3>
         <ul>
           <li>Scheduled source refresh with fingerprint-based updates</li>
-          <li>Retry and fallback behavior for reliable ingestion</li>
-          <li>Optional LLM layer on top of retrieval</li>
-          <li>Persistent storage for indexed knowledge</li>
+          <li>Session memory across multiple chat turns</li>
+          <li>Image evidence extraction with ambiguity detection</li>
+          <li>Validation checks before final response delivery</li>
         </ul>
       </div>
       <div class="panel">
         <h3>Experiment Assets</h3>
         <ul>
           <li>Benchmark dataset for retrieval evaluation</li>
-          <li>Baseline vs improved retriever comparison</li>
+          <li>Text-only vs multimodal reasoning comparison</li>
           <li>Saved metrics in <code>artifacts/benchmark_results.json</code></li>
           <li>Generated plots for submission-ready visuals</li>
         </ul>

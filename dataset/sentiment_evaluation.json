@@ -1,0 +1,20 @@
+[
+  {"text": "Thanks, this is great and helpful.", "label": "positive"},
+  {"text": "I love how quickly the index updates.", "label": "positive"},
+  {"text": "Excellent support, the answer was perfect.", "label": "positive"},
+  {"text": "I am happy with this response.", "label": "positive"},
+  {"text": "This is awesome!", "label": "positive"},
+  {"text": "The chatbot is good and useful.", "label": "positive"},
+  {"text": "I am frustrated because the sync is broken.", "label": "negative"},
+  {"text": "This problem is terrible and confusing.", "label": "negative"},
+  {"text": "I am worried that the answer is wrong.", "label": "negative"},
+  {"text": "The update failed and I am upset.", "label": "negative"},
+  {"text": "This is an awful experience.", "label": "negative"},
+  {"text": "I hate this issue.", "label": "negative"},
+  {"text": "How does the chatbot refresh its sources?", "label": "neutral"},
+  {"text": "Where can I view the sync status?", "label": "neutral"},
+  {"text": "What is the current chunk size?", "label": "neutral"},
+  {"text": "Show the latest indexed documents.", "label": "neutral"},
+  {"text": "Can I start a manual synchronization?", "label": "neutral"},
+  {"text": "When does the scheduler run?", "label": "neutral"}
+]

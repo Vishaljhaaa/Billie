@@ -1,0 +1,10 @@
+[
+  {"text": "How does the knowledge base update?", "language": "en", "normalized_terms": ["knowledge", "update"]},
+  {"text": "Como actualiza la base de conocimiento?", "language": "es", "normalized_terms": ["knowledge", "update"]},
+  {"text": "Donde informo un problema de seguridad?", "language": "es", "normalized_terms": ["where", "report", "security"]},
+  {"text": "ज्ञान बेस कैसे अपडेट होता है?", "language": "hi", "normalized_terms": ["knowledge", "update"]},
+  {"text": "सुरक्षा रिपोर्ट कहाँ करें?", "language": "hi", "normalized_terms": ["security", "report", "where"]},
+  {"text": "জ্ঞান বেস কিভাবে আপডেট হয়?", "language": "bn", "normalized_terms": ["knowledge", "update"]},
+  {"text": "নিরাপত্তা রিপোর্ট কোথায় করবেন?", "language": "bn", "normalized_terms": ["security", "report", "where"]},
+  {"text": "Please actualiza ज्ञान base", "language": "hi", "normalized_terms": ["knowledge", "update"]}
+]

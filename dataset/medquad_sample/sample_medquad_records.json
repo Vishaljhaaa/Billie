@@ -1,0 +1,62 @@
+[
+  {
+    "question": "What are the symptoms of Adult Acute Lymphoblastic Leukemia?",
+    "answer": "Signs and symptoms of adult acute lymphoblastic leukemia may include fever, feeling tired, easy bruising or bleeding, weakness, night sweats, shortness of breath, weight loss, bone pain, and frequent infections.",
+    "question_type": "symptoms",
+    "focus": "Adult Acute Lymphoblastic Leukemia",
+    "cui": "C0751606",
+    "semantic_type": "Neoplastic Process; Disease or Syndrome",
+    "entity_category": "disease",
+    "synonyms": ["ALL", "acute lymphocytic leukemia"]
+  },
+  {
+    "question": "How is Adult Acute Lymphoblastic Leukemia treated?",
+    "answer": "Treatment for adult acute lymphoblastic leukemia may include combination chemotherapy, targeted therapy, radiation therapy, central nervous system prophylaxis, and stem cell transplant depending on the patient's condition and disease status.",
+    "question_type": "treatment",
+    "focus": "Adult Acute Lymphoblastic Leukemia",
+    "cui": "C0751606",
+    "semantic_type": "Neoplastic Process; Disease or Syndrome",
+    "entity_category": "disease",
+    "synonyms": ["ALL", "acute lymphocytic leukemia"]
+  },
+  {
+    "question": "What is asthma?",
+    "answer": "Asthma is a chronic disease that affects the airways. The airways can become inflamed and narrow, which may cause wheezing, coughing, chest tightness, and shortness of breath.",
+    "question_type": "information",
+    "focus": "Asthma",
+    "cui": "C0004096",
+    "semantic_type": "Disease or Syndrome",
+    "entity_category": "disease",
+    "synonyms": ["bronchial asthma"]
+  },
+  {
+    "question": "What are common treatments for asthma?",
+    "answer": "Asthma treatment may include avoiding triggers, using quick-relief inhalers during symptoms, and using long-term control medicines to reduce airway inflammation. A clinician should guide the treatment plan.",
+    "question_type": "treatment",
+    "focus": "Asthma",
+    "cui": "C0004096",
+    "semantic_type": "Disease or Syndrome",
+    "entity_category": "disease",
+    "synonyms": ["bronchial asthma"]
+  },
+  {
+    "question": "What are symptoms of asthma?",
+    "answer": "Asthma symptoms may include wheezing, coughing, chest tightness, and shortness of breath. Symptoms can vary by person and may worsen after exposure to triggers.",
+    "question_type": "symptoms",
+    "focus": "Asthma",
+    "cui": "C0004096",
+    "semantic_type": "Disease or Syndrome",
+    "entity_category": "disease",
+    "synonyms": ["bronchial asthma"]
+  },
+  {
+    "question": "What are symptoms of diabetes?",
+    "answer": "Symptoms of diabetes may include increased thirst, frequent urination, fatigue, blurred vision, slow-healing sores, unexplained weight loss, and increased hunger.",
+    "question_type": "symptoms",
+    "focus": "Diabetes Mellitus",
+    "cui": "C0011849",
+    "semantic_type": "Disease or Syndrome",
+    "entity_category": "disease",
+    "synonyms": ["diabetes"]
+  }
+]

@@ -1,0 +1,3 @@
+{"paper_id": "sample1", "title": "Retrieval-Augmented Models for QA", "abstract": "This paper shows retrieval improves QA.", "categories": "cs.AI"}
+{"paper_id": "sample2", "title": "Efficient Search in Large Indexes", "abstract": "Search and retrieval for information systems.", "categories": "cs.IR"}
+{"paper_id": "sample3", "title": "Transformer-based Retrieval Models", "abstract": "Combining transformers with retrieval modules.", "categories": "cs.AI"}

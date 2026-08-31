@@ -15,6 +15,10 @@ venv/
 /dataset/arxiv/arxiv-metadata-oai-snapshot.json
 /dataset/MedQuAD/
 
+# Keep small sample datasets tracked for tests
+!dataset/arxiv_sample/
+!dataset/medquad_sample/
+
 # Chroma local store and sqlite state
 data/chroma/
 *.sqlite3

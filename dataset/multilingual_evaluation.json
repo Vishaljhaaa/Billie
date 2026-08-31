@@ -1,0 +1,10 @@
+[
+  {"text": "How do I update the knowledge base?", "language": "en", "normalized_terms": ["update", "knowledge"]},
+  {"text": "Where to report security?", "language": "en", "normalized_terms": ["report", "security"]},
+  {"text": "How to sync data?", "language": "en", "normalized_terms": ["sync", "data"]},
+  {"text": "How to update knowledge?", "language": "en", "normalized_terms": ["update", "knowledge"]},
+  {"text": "Please update the base", "language": "en", "normalized_terms": ["update", "base"]},
+  {"text": "How can I report?", "language": "en", "normalized_terms": ["report"]},
+  {"text": "Where is the security playbook?", "language": "en", "normalized_terms": ["security", "playbook"]},
+  {"text": "Update the product notes", "language": "en", "normalized_terms": ["update", "product"]}
+]

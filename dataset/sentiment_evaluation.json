@@ -1,0 +1,12 @@
+[
+  {"text": "I love this product, it's perfect!", "label": "positive"},
+  {"text": "This is awesome and very helpful", "label": "positive"},
+  {"text": "Thanks, I'm very pleased", "label": "positive"},
+  {"text": "I am angry and frustrated about this bug", "label": "negative"},
+  {"text": "This is awful and terrible", "label": "negative"},
+  {"text": "I'm disappointed and upset", "label": "negative"},
+  {"text": "This seems okay", "label": "neutral"},
+  {"text": "No problem, works fine", "label": "neutral"},
+  {"text": "I have no issue with this", "label": "neutral"},
+  {"text": "It behaves as expected", "label": "neutral"}
+]

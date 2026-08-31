@@ -423,7 +423,7 @@ The repo includes submission-ready visuals:
 
 ## Assumptions and Limitations
 
-### Assumptions
+### Assumptions taken
 
 - The task 1 base project is `elev/dynamically expanding chatbot memory`, and this repository is an extension of that same codebase.
 - The original chatbot knowledge corpus remains the primary dataset, while the visual cases are an added multimodal extension in the same problem domain.

@@ -3,8 +3,10 @@
   "chunk_size": 700,
   "chunk_overlap": 100,
   "top_k": 4,
+  "memory_window": 4,
   "vector_store_dir": "./data/chroma",
   "metadata_db_path": "./data/source_state.db",
+  "session_store_path": "./data/session_memory.json",
   "sources": [
     {
       "id": "company-handbook",

@@ -14,6 +14,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from app.config import AppConfig
+from app.preprocessing import tokenize_and_lemmatize
 from app.sources import SourceLoader
 from app.text_utils import chunk_text
 
@@ -22,17 +23,7 @@ RESULTS_DIR = PROJECT_ROOT / "artifacts"
 
 
 def tokenize(text: str) -> list[str]:
-    cleaned = []
-    token = []
-    for char in text.lower():
-        if char.isalnum():
-            token.append(char)
-        elif token:
-            cleaned.append("".join(token))
-            token = []
-    if token:
-        cleaned.append("".join(token))
-    return cleaned
+    return tokenize_and_lemmatize(text)
 
 
 @dataclass(frozen=True)
@@ -158,8 +149,10 @@ def run() -> None:
         chunk_size=220,
         chunk_overlap=0,
         top_k=config.top_k,
+        memory_window=config.memory_window,
         vector_store_dir=config.vector_store_dir,
         metadata_db_path=config.metadata_db_path,
+        session_store_path=config.session_store_path,
         source_timeout_seconds=config.source_timeout_seconds,
         source_max_retries=config.source_max_retries,
         source_retry_backoff_seconds=config.source_retry_backoff_seconds,
@@ -172,8 +165,10 @@ def run() -> None:
         chunk_size=220,
         chunk_overlap=60,
         top_k=config.top_k,
+        memory_window=config.memory_window,
         vector_store_dir=config.vector_store_dir,
         metadata_db_path=config.metadata_db_path,
+        session_store_path=config.session_store_path,
         source_timeout_seconds=config.source_timeout_seconds,
         source_max_retries=config.source_max_retries,
         source_retry_backoff_seconds=config.source_retry_backoff_seconds,

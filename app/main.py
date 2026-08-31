@@ -2,21 +2,30 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
 from fastapi import Depends, FastAPI, Request
 from fastapi.responses import HTMLResponse
 
 from app.admin import render_admin_page, render_home_page
+from app.arxiv_expert import ArxivExpertService
 from app.auth import AuthManager
 from app.chatbot import RetrievalChatbot
 from app.config import AppConfig
 from app.llm import OpenAICompatibleLLMClient
+from app.memory import ConversationMemoryStore
+from app.medical_qa import MedicalQAService
 from app.monitoring import AppMonitor
 from app.schemas import ChatRequest, ChatResponse, SyncResponse
 from app.scheduler import SyncScheduler
 from app.updater import KnowledgeBaseUpdater
+from app.validation import ResponseValidator
 from app.vector_store import VectorStore
+from app.vision import VisualAnalyzer
+
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 
 @dataclass
@@ -28,6 +37,9 @@ class ServiceContainer:
     scheduler: SyncScheduler
     auth: AuthManager
     monitor: AppMonitor
+    memory_store: ConversationMemoryStore
+    medical_service: MedicalQAService
+    arxiv_service: ArxivExpertService
 
 
 def build_services(
@@ -39,14 +51,34 @@ def build_services(
     scheduler: SyncScheduler | None = None,
     auth: AuthManager | None = None,
     monitor: AppMonitor | None = None,
+    memory_store: ConversationMemoryStore | None = None,
+    medical_service: MedicalQAService | None = None,
+    arxiv_service: ArxivExpertService | None = None,
 ) -> ServiceContainer:
     monitor = monitor or AppMonitor()
     vector_store = vector_store or VectorStore(config)
     updater = updater or KnowledgeBaseUpdater(config, vector_store)
     llm_client = OpenAICompatibleLLMClient(config.llm) if config.llm.enabled else None
-    chatbot = chatbot or RetrievalChatbot(config, vector_store, monitor, llm_client)
+    memory_store = memory_store or ConversationMemoryStore(config.session_store_path)
+    chatbot = chatbot or RetrievalChatbot(
+        config,
+        vector_store,
+        monitor,
+        llm_client,
+        memory_store=memory_store,
+        visual_analyzer=VisualAnalyzer(llm_client),
+        validator=ResponseValidator(),
+    )
     scheduler = scheduler or SyncScheduler(updater, config.poll_interval_minutes)
     auth = auth or AuthManager(config.auth)
+    medical_service = medical_service or MedicalQAService.from_dataset(
+        PROJECT_ROOT / "dataset" / "MedQuAD",
+        fallback_sample_path=PROJECT_ROOT / "dataset" / "medquad_sample" / "sample_medquad_records.json",
+    )
+    arxiv_service = arxiv_service or ArxivExpertService.from_dataset(
+        PROJECT_ROOT / "dataset" / "arxiv" / "arxiv-metadata-oai-snapshot.json",
+        fallback_sample_path=PROJECT_ROOT / "dataset" / "arxiv_sample" / "sample_arxiv_cs.jsonl",
+    )
     return ServiceContainer(
         config=config,
         vector_store=vector_store,
@@ -55,6 +87,9 @@ def build_services(
         scheduler=scheduler,
         auth=auth,
         monitor=monitor,
+        memory_store=memory_store,
+        medical_service=medical_service,
+        arxiv_service=arxiv_service,
     )
 
 
@@ -120,7 +155,44 @@ def create_app(
         _: None = Depends(services.auth.require_api_key),
     ) -> ChatResponse:
         current = get_services(request)
-        return current.chatbot.answer(request_body.question)
+        if request_body.mode == "medical":
+            result = current.medical_service.answer(request_body.question)
+            sources = [result.source] if result.source else []
+            current.memory_store.append_turn(
+                request_body.session_id,
+                question=request_body.question,
+                answer=result.answer,
+                sources=sources,
+                visual_summaries=[],
+            )
+            return ChatResponse(
+                answer=result.answer,
+                sources=sources,
+                mode="medical",
+                session_id=request_body.session_id,
+            )
+        if request_body.mode == "research":
+            history = [turn["question"] for turn in current.memory_store.recent_turns(request_body.session_id, 2)]
+            result = current.arxiv_service.answer(request_body.question, history=history)
+            sources = [paper.paper_id for paper in result.papers]
+            current.memory_store.append_turn(
+                request_body.session_id,
+                question=request_body.question,
+                answer=result.answer,
+                sources=sources,
+                visual_summaries=[],
+            )
+            return ChatResponse(
+                answer=result.answer,
+                sources=sources,
+                mode="research",
+                session_id=request_body.session_id,
+            )
+        return current.chatbot.answer(
+            request_body.question,
+            session_id=request_body.session_id,
+            image_inputs=request_body.image_inputs,
+        )
 
     @app.get("/admin", response_class=HTMLResponse)
     def admin_page() -> str:

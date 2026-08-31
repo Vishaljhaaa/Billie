@@ -1,0 +1,4 @@
+# Optional: needed only when MULTILINGUAL_TRANSLATION_BACKEND=nllb.
+transformers>=4.45.0
+sentencepiece>=0.2.0
+torch>=2.4.0

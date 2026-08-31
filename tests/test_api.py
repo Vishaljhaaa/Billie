@@ -34,8 +34,10 @@ def make_config(tmp_path: Path) -> AppConfig:
         chunk_size=120,
         chunk_overlap=10,
         top_k=2,
+        memory_window=4,
         vector_store_dir=tmp_path / "chroma",
         metadata_db_path=tmp_path / "state.db",
+        session_store_path=tmp_path / "sessions.json",
         source_timeout_seconds=5,
         source_max_retries=2,
         source_retry_backoff_seconds=0.0,
@@ -70,3 +72,30 @@ def test_api_auth_and_admin_status(tmp_path: Path):
         body = chat_response.json()
         assert body["sources"]
         assert body["used_llm"] is False
+        assert body["session_id"] == "default"
+        assert "validation" in body
+
+
+def test_api_uses_the_same_chat_endpoint_for_medical_and_research_modes(tmp_path: Path):
+    config = make_config(tmp_path)
+    services = build_services(config, vector_store=InMemoryVectorStore())
+    app = create_app(config, services=services, run_scheduler=False)
+
+    with TestClient(app) as client:
+        medical = client.post(
+            "/chat",
+            json={"question": "What symptoms happen with asthma?", "mode": "medical"},
+            headers={"X-API-Key": "chat-secret"},
+        )
+        research = client.post(
+            "/chat",
+            json={"question": "How does retrieval augmented generation help question answering?", "mode": "research"},
+            headers={"X-API-Key": "chat-secret"},
+        )
+
+    assert medical.status_code == 200
+    assert medical.json()["mode"] == "medical"
+    assert medical.json()["sources"]
+    assert research.status_code == 200
+    assert research.json()["mode"] == "research"
+    assert research.json()["sources"]

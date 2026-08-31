@@ -23,6 +23,12 @@ RETRIEVAL_STOPWORDS = {
     "this", "to", "what", "when", "where", "which", "who", "with", "you",
 }
 
+# Simple greeting phrases to handle chit-chat without hitting the retrieval layer.
+GREETING_PATTERNS = (
+    r"^\s*(hi|hello|hey|greetings)([\s!.,]*)$",
+    r"^\s*(good\s+morning|good\s+afternoon|good\s+evening)([\s!.,]*)$",
+)
+
 
 class RetrievalChatbot:
     def __init__(
@@ -65,6 +71,31 @@ class RetrievalChatbot:
         self.monitor.record_language(language.primary_language)
         sentiment = self.sentiment_analyzer.analyze(question)
         self.monitor.record_sentiment(sentiment.label)
+        # Short-circuit simple greetings with a friendly, contextual reply.
+        lowered = question.strip().lower()
+        for patt in GREETING_PATTERNS:
+            if re.match(patt, lowered):
+                greeting_answer = (
+                    "Hello — I'm the Unified AI Chatbot. Ask me about the knowledge base "
+                    "(company handbook, product updates, security playbook), or type a specific question."
+                )
+                adapted = self.sentiment_adapter.adapt(greeting_answer, sentiment)
+                adapted = self.language_adapter.adapt(adapted, language)
+                return ChatResponse(
+                    answer=adapted,
+                    sources=[],
+                    used_llm=False,
+                    session_id=session_id,
+                    sentiment=self._sentiment_payload(sentiment),
+                    language=self._language_payload(language),
+                    validation=self.validator.validate(
+                        answer=adapted,
+                        question=question,
+                        text_snippets=[],
+                        evidence=[],
+                        needs_clarification=False,
+                    ),
+                )
         if image_inputs:
             self.monitor.record_image_chat(len(image_inputs))
         matches = self.vector_store.search(language.normalized_query, top_k=self.config.top_k)

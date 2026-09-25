@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import sys
+import argparse
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -10,8 +11,9 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from app.multilingual import LanguageDetector
 
+RESULTS_DIR = PROJECT_ROOT / "docs" / "evaluation" / "baseline-2026-09-26"
 
-def run() -> dict[str, object]:
+def run(results_dir: Path | None = None) -> dict[str, object]:
     rows = json.loads((PROJECT_ROOT / "dataset" / "multilingual_evaluation.json").read_text(encoding="utf-8"))
     detector = LanguageDetector()
     language_hits = 0
@@ -31,11 +33,13 @@ def run() -> dict[str, object]:
         "details": details,
         "note": "This evaluates deterministic language detection and retrieval-term normalization. Set MULTILINGUAL_TRANSLATION_BACKEND=nllb to use the optional open-source NLLB full-sentence translation backend.",
     }
-    artifact_dir = PROJECT_ROOT / "artifacts"
-    artifact_dir.mkdir(exist_ok=True)
+    artifact_dir = results_dir or RESULTS_DIR
+    artifact_dir.mkdir(parents=True, exist_ok=True)
     (artifact_dir / "multilingual_evaluation_results.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")
     return payload
 
 
 if __name__ == "__main__":
-    print(json.dumps(run(), indent=2))
+    parser = argparse.ArgumentParser(description="Run the offline language normalization evaluation.")
+    parser.add_argument("--results-dir", type=Path, default=RESULTS_DIR)
+    print(json.dumps(run(parser.parse_args().results_dir), indent=2))

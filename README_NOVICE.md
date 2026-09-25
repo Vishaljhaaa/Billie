@@ -7,12 +7,12 @@ This guide explains, in simple steps, how to run the project locally or in Docke
 
 **Three simple ways to run it (pick one)**
 
-**1) Streamlit GUI (recommended for non-technical users)**
-- Prereqs: Python 3.10+ installed.
+**1) Streamlit GUI**
+- Prerequisite: Python 3.12 installed.
 - From a fresh PowerShell in the project root:
 ```powershell
-cd C:\Users\Vishal\Desktop\project
-py -3 -m venv .venv
+cd path\to\project
+py -3.12 -m venv .venv
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned -Force
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
@@ -38,30 +38,38 @@ python .\scripts\demo_chat.py
 }
 ```
 
-**3) Run the API (for power users or integrations)**
+**3) Run the API (for integrations)**
 - Start the FastAPI server (the app factory lives in `app/main.py`):
 ```powershell
 .\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
-python -m uvicorn app.main:create_app --host 0.0.0.0 --port 8000
+python -m uvicorn app.main:create_app --factory --host 127.0.0.1 --port 8000
 ```
 - Example request (POST `/chat`): see `FRONTEND_USAGE.md` for a sample payload. The response uses the same JSON structure as the CLI demo.
 
-**Docker (one-line run for novices)**
-- Build and run (choose port 8501 for Streamlit or 8000 for API):
+**Run offline tests**
+
+From the activated Python 3.12 environment, run:
 ```powershell
-docker build -t billie .
-# For Streamlit UI
-docker run -p 8501:8501 billie
-# For API
-docker run -p 8000:8000 billie
+python -m pytest -q
+```
+
+Tests do not need API keys or optional downloaded models.
+
+**Docker**
+
+The Dockerfile runs only FastAPI on port 8000; Streamlit is run separately with the command above. The image includes small medical and arXiv fallback samples, not the full MedQuAD or 5.4 GB arXiv data. Docker builds have not been verified in the current development environment.
+
+```powershell
+docker build -t billie:local .
+docker run --rm -p 8000:8000 --env-file .env billie:local
 ```
 
 **How to interpret what you see**
 - **`answer`**: the chatbot's response.
 - **`sources`**: list of documents/filenames used to support the answer — check these to verify claims.
 - **`used_llm`**: `false` means the system returned a retrieval-only answer; `true` means an LLM was used.
-- **`validation.grounded`**: `true` means the answer was supported by retrieved evidence; `false` means validation failed or no supporting evidence was found.
+- **`validation.grounded`**: a heuristic token-overlap result, not proof that the answer is factually correct.
 - **`validation.issues`**: human-readable list of problems when grounded is `false` (e.g., "No supporting evidence was available for validation."). If you see "Needs Review" in the UI, treat the answer as unverified until you confirm the sources.
 
 Screenshots: If you see the UI message "I couldn't find relevant text or visual evidence in the current knowledge base," try a different query or add more documents to the `knowledge/` folder.
@@ -72,9 +80,9 @@ Screenshots: If you see the UI message "I couldn't find relevant text or visual 
   - Fix (fresh PowerShell session, run from project root):
 ```powershell
 # close other shells, then in a new PowerShell
-cd C:\Users\Vishal\Desktop\project
-Remove-Item -Recurse -Force .venv      # remove broken env
-py -3 -m venv .venv
+cd path\to\project
+Remove-Item -Recurse -Force .venv      # only remove this project's broken environment
+py -3.12 -m venv .venv
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned -Force
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
@@ -88,7 +96,7 @@ python -m pip install -r requirements.txt
 - Run the project's updater (or run `scripts/demo_chat.py` if it triggers loading) to index new documents. If your setup uses Chroma or another vector store, follow `app/vector_store.py` comments for rebuilding the index.
 
 **Quick checklist to hand to a novice user**
-1. Install Python 3.10+.
+1. Install Python 3.12.
 2. Open PowerShell and `cd` to the project.
 3. Run the Streamlit flow (see above) and open http://localhost:8501.
 4. Type a question; examine `sources` and `validation` details.

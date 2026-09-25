@@ -40,3 +40,10 @@ def test_scientific_nlp_builds_concept_graph():
 
     assert concepts
     assert graph.startswith("graph concepts")
+
+
+def test_arxiv_expert_reports_when_no_dataset_records_are_available():
+    answer = ArxivExpertService([]).answer("How does retrieval augmented generation work?")
+
+    assert answer.papers == []
+    assert "could not find a relevant computer science paper" in answer.answer.lower()

@@ -1,0 +1,63 @@
+{
+  "dataset_id": "billie-retrieval-v1",
+  "version": 1,
+  "created_on": "2026-09-26",
+  "format": "JSON Lines queries.jsonl",
+  "source_scope": "The three checked-in local knowledge files configured in sources.json. The configured python-news URL is excluded: the existing six-chunk cache is stale, and the current page is a navigation-heavy listing; no verified byte-identical snapshot is retained. No linked article pages are included.",
+  "sources": [
+    {
+      "source_id": "company-handbook",
+      "path": "knowledge/company_handbook.txt",
+      "sha256": "13a0d2d6a4eadb5745edd9d7cf4b8368371e6ea399e4a3ac4b875bdce343f358",
+      "bytes": 338,
+      "factual_sentences": 3
+    },
+    {
+      "source_id": "product-updates",
+      "path": "knowledge/product_updates.txt",
+      "sha256": "e8bb0c518ba5ca9b3f78378812bf602928e2c362b9741d2d39146a36e3d1cebd",
+      "bytes": 428,
+      "factual_sentences": 4
+    },
+    {
+      "source_id": "security-playbook",
+      "path": "knowledge/security_playbook.txt",
+      "sha256": "a09a1b30b2da005fc82d4ef63a341b1d197e7d31b5cf8d0a9394cabe7cf610ea",
+      "bytes": 469,
+      "factual_sentences": 4
+    }
+  ],
+  "source_total_bytes": 1235,
+  "source_factual_sentence_units": 11,
+  "tokenizer": "retrieval-tokenizer-v1: lowercase ASCII alphanumeric tokens; punctuation separates tokens; no external corpus or model",
+  "chunking": {
+    "size_characters": 220,
+    "overlap_characters": 60,
+    "reason": "Use the legacy CosineOverlap benchmark's improved chunk settings consistently across the retrieval variants; record this separately from production defaults."
+  },
+  "label_schema": {
+    "query_id": "stable ID",
+    "evidence_cluster": "facts and paraphrases sharing evidence remain in one split",
+    "split": "development or test",
+    "answerability": "answerable or unanswerable relative to these three indexed local sources",
+    "relevant_passages": "source_id, verbatim quote, relevance grade (1 contextual, 2 directly answers); evaluator resolves the quote to chunk IDs for this frozen source fingerprint and chunk configuration"
+  },
+  "labeling_method": "Questions were written from the checked-in source claims. Each answerable label includes an exact source quote and source ID; unanswerable labels have no supporting quote after checking all three complete files. No expected answer text is stored. Automated quote-presence and source-hash tests validate the annotations. This is source-checked by the implementation author, not independently reviewed by a second human; obtain human review before treating it as a portfolio-grade benchmark.",
+  "review_status": "source-anchored draft; independent human review pending",
+  "split_method": "Evidence-cluster split: all paraphrases for a fact share one split. Multi-passage combinations are held out as combinations. Unanswerable probes are in test. This tiny corpus does not support statistically powered generalization.",
+  "counts": {
+    "queries": 30,
+    "answerable": 24,
+    "unanswerable": 6,
+      "development": 15,
+      "test": 15,
+    "distinct_local_evidence_clusters": 11
+  },
+  "limitations": [
+    "The local corpus is only 1,235 bytes and 11 factual sentences; several query variants necessarily share evidence.",
+    "No date or numeric answer is present in the local indexed knowledge files; date/number probes are unanswerable in this corpus.",
+    "The dynamic python-news source is excluded from this version until a byte-identical project-loader snapshot can be retained and reviewed.",
+    "No independent human relevance reviewer has signed off on these annotations.",
+    "This set is diagnostic only and cannot support statistically meaningful quality claims."
+  ]
+}

@@ -230,13 +230,13 @@ class MedicalEntityRecognizer:
 
         for term in sorted(SYMPTOM_TERMS, key=len, reverse=True):
             if term in lowered:
-                entities.append(MedicalEntity(text=term, category="symptom"))
+                entities.append(MedicalEntity(text=term.capitalize(), category="symptom"))
         for term in sorted(TREATMENT_TERMS, key=len, reverse=True):
             if term in lowered:
-                entities.append(MedicalEntity(text=term, category="treatment"))
+                entities.append(MedicalEntity(text=term.capitalize(), category="treatment"))
         for term in sorted(DISEASE_HINTS, key=len, reverse=True):
             if term in lowered:
-                entities.append(MedicalEntity(text=term, category="disease"))
+                entities.append(MedicalEntity(text=term.capitalize(), category="disease"))
 
         if record is not None and record.focus:
             category = record.entity_category.lower() or self._category_from_semantic_type(record.semantic_type)
@@ -244,7 +244,15 @@ class MedicalEntityRecognizer:
 
         deduped: dict[tuple[str, str], MedicalEntity] = {}
         for entity in entities:
-            deduped[(entity.text.lower(), entity.category)] = entity
+            key = (entity.text.casefold(), entity.category)
+            existing = deduped.get(key)
+            is_record_focus = record is not None and entity.text == record.focus
+            if (
+                existing is None
+                or is_record_focus
+                or (entity.text[:1].isupper() and not existing.text[:1].isupper())
+            ):
+                deduped[key] = entity
         return list(deduped.values())
 
     def _category_from_semantic_type(self, semantic_type: str) -> str:

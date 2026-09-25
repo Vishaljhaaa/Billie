@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import sys
+import argparse
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -12,8 +13,9 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from app.sentiment import SentimentAnalyzer, SentimentResponseAdapter
 
+RESULTS_DIR = PROJECT_ROOT / "docs" / "evaluation" / "baseline-2026-09-26"
 
-def run() -> dict[str, object]:
+def run(results_dir: Path | None = None) -> dict[str, object]:
     rows = json.loads((PROJECT_ROOT / "dataset" / "sentiment_evaluation.json").read_text(encoding="utf-8"))
     analyzer = SentimentAnalyzer()
     adapter = SentimentResponseAdapter()
@@ -51,8 +53,8 @@ def run() -> dict[str, object]:
         "response_appropriateness_rate": round(appropriate / len(rows), 3),
         "assessment": "Appropriateness checks whether negative messages receive empathy, positive messages receive acknowledgement, and neutral messages stay factual. This is a deterministic offline measure, not a real customer-satisfaction study.",
     }
-    artifact_dir = PROJECT_ROOT / "artifacts"
-    artifact_dir.mkdir(exist_ok=True)
+    artifact_dir = results_dir or RESULTS_DIR
+    artifact_dir.mkdir(parents=True, exist_ok=True)
     (artifact_dir / "sentiment_evaluation_results.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")
     plt.figure(figsize=(7, 4))
     plt.bar(["Accuracy", "Macro F1", "Response appropriateness"], [payload["accuracy"], payload["macro_f1"], payload["response_appropriateness_rate"]], color="#2F7A72")
@@ -64,4 +66,6 @@ def run() -> dict[str, object]:
 
 
 if __name__ == "__main__":
-    print(json.dumps(run(), indent=2))
+    parser = argparse.ArgumentParser(description="Run the offline sentiment evaluation.")
+    parser.add_argument("--results-dir", type=Path, default=RESULTS_DIR)
+    print(json.dumps(run(parser.parse_args().results_dir), indent=2))

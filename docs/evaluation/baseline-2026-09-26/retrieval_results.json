@@ -1,0 +1,14 @@
+[
+  {
+    "model": "KeywordOverlap",
+    "top1_accuracy": 1.0,
+    "top3_accuracy": 1.0,
+    "avg_keyword_recall": 0.8
+  },
+  {
+    "model": "CosineOverlap",
+    "top1_accuracy": 1.0,
+    "top3_accuracy": 1.0,
+    "avg_keyword_recall": 0.733
+  }
+]

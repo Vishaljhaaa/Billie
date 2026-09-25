@@ -1,0 +1,136 @@
+{
+  "TextOnlyFallback": [
+    {
+      "id": "release-board-date",
+      "question": "When does the public beta start for Asteria Notes?",
+      "expected_keywords": [
+        "august 12",
+        "asteria notes"
+      ],
+      "keyword_recall": 0.0,
+      "expected_clarification": false,
+      "actual_clarification": false,
+      "clarification_match": true,
+      "validator_grounded": false,
+      "image_paths": [],
+      "all_images_present": true,
+      "answer": "I couldn't find relevant text or visual evidence in the current knowledge base."
+    },
+    {
+      "id": "security-reporting",
+      "question": "Where should I report OTP phishing?",
+      "expected_keywords": [
+        "security@company.test"
+      ],
+      "keyword_recall": 0.0,
+      "expected_clarification": false,
+      "actual_clarification": false,
+      "clarification_match": true,
+      "validator_grounded": false,
+      "image_paths": [],
+      "all_images_present": true,
+      "answer": "I couldn't find relevant text or visual evidence in the current knowledge base."
+    },
+    {
+      "id": "security-memory-followup",
+      "question": "Can you repeat the reporting email?",
+      "expected_keywords": [
+        "security@company.test"
+      ],
+      "keyword_recall": 0.0,
+      "expected_clarification": false,
+      "actual_clarification": false,
+      "clarification_match": true,
+      "validator_grounded": false,
+      "image_paths": [],
+      "all_images_present": true,
+      "answer": "I couldn't find relevant text or visual evidence in the current knowledge base."
+    },
+    {
+      "id": "ambiguous-launch-date",
+      "question": "What launch date is shown in the image?",
+      "expected_keywords": [
+        "which item",
+        "interpretation"
+      ],
+      "keyword_recall": 0.0,
+      "expected_clarification": true,
+      "actual_clarification": false,
+      "clarification_match": false,
+      "validator_grounded": false,
+      "image_paths": [],
+      "all_images_present": true,
+      "answer": "I couldn't find relevant text or visual evidence in the current knowledge base."
+    }
+  ],
+  "MultimodalReasoner": [
+    {
+      "id": "release-board-date",
+      "question": "When does the public beta start for Asteria Notes?",
+      "expected_keywords": [
+        "august 12",
+        "asteria notes"
+      ],
+      "keyword_recall": 0.0,
+      "expected_clarification": false,
+      "actual_clarification": false,
+      "clarification_match": true,
+      "validator_grounded": true,
+      "image_paths": [
+        "C:\\Users\\max03\\Downloads\\project\\dataset\\visual_cases\\release_board.png"
+      ],
+      "all_images_present": false,
+      "answer": "Image supplied at C:\\Users\\max03\\Downloads\\project\\dataset\\visual_cases\\release_board.png, but no extractor was available."
+    },
+    {
+      "id": "security-reporting",
+      "question": "Where should I report OTP phishing?",
+      "expected_keywords": [
+        "security@company.test"
+      ],
+      "keyword_recall": 0.0,
+      "expected_clarification": false,
+      "actual_clarification": false,
+      "clarification_match": true,
+      "validator_grounded": false,
+      "image_paths": [
+        "C:\\Users\\max03\\Downloads\\project\\dataset\\visual_cases\\security_alert.png"
+      ],
+      "all_images_present": false,
+      "answer": "I could not find a confirmed phishing-reporting channel in the indexed sources."
+    },
+    {
+      "id": "security-memory-followup",
+      "question": "Can you repeat the reporting email?",
+      "expected_keywords": [
+        "security@company.test"
+      ],
+      "keyword_recall": 0.0,
+      "expected_clarification": false,
+      "actual_clarification": false,
+      "clarification_match": true,
+      "validator_grounded": false,
+      "image_paths": [],
+      "all_images_present": true,
+      "answer": "I could not find a confirmed phishing-reporting channel in the indexed sources."
+    },
+    {
+      "id": "ambiguous-launch-date",
+      "question": "What launch date is shown in the image?",
+      "expected_keywords": [
+        "which item",
+        "interpretation"
+      ],
+      "keyword_recall": 0.0,
+      "expected_clarification": true,
+      "actual_clarification": false,
+      "clarification_match": false,
+      "validator_grounded": true,
+      "image_paths": [
+        "C:\\Users\\max03\\Downloads\\project\\dataset\\visual_cases\\dual_schedule.png"
+      ],
+      "all_images_present": false,
+      "answer": "Image supplied at C:\\Users\\max03\\Downloads\\project\\dataset\\visual_cases\\dual_schedule.png, but no extractor was available."
+    }
+  ]
+}

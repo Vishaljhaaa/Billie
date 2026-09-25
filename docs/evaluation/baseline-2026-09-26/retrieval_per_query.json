@@ -1,0 +1,176 @@
+{
+  "KeywordOverlap": [
+    {
+      "question": "How does the chatbot learn about new information over time?",
+      "expected_source": "company-handbook",
+      "retrieved_sources": [
+        "company-handbook",
+        "company-handbook",
+        "product-updates"
+      ],
+      "top1_match": true,
+      "top3_match": true,
+      "expected_keywords": [
+        "detect",
+        "change",
+        "re-embed",
+        "retrieval"
+      ],
+      "keyword_recall": 1.0
+    },
+    {
+      "question": "Can the system refresh the knowledge base automatically as well as manually?",
+      "expected_source": "product-updates",
+      "retrieved_sources": [
+        "product-updates",
+        "company-handbook",
+        "security-playbook"
+      ],
+      "top1_match": true,
+      "top3_match": true,
+      "expected_keywords": [
+        "scheduled",
+        "polling",
+        "manually",
+        "admin"
+      ],
+      "keyword_recall": 1.0
+    },
+    {
+      "question": "What headers protect public chat access and admin operations?",
+      "expected_source": "security-playbook",
+      "retrieved_sources": [
+        "security-playbook",
+        "company-handbook",
+        "product-updates"
+      ],
+      "top1_match": true,
+      "top3_match": true,
+      "expected_keywords": [
+        "x-api-key",
+        "x-admin-key"
+      ],
+      "keyword_recall": 0.5
+    },
+    {
+      "question": "What happens if the language model is down?",
+      "expected_source": "security-playbook",
+      "retrieved_sources": [
+        "security-playbook",
+        "company-handbook",
+        "company-handbook"
+      ],
+      "top1_match": true,
+      "top3_match": true,
+      "expected_keywords": [
+        "fallback",
+        "retrieval-only"
+      ],
+      "keyword_recall": 0.5
+    },
+    {
+      "question": "What operational data can users inspect from the service?",
+      "expected_source": "product-updates",
+      "retrieved_sources": [
+        "product-updates",
+        "product-updates",
+        "security-playbook"
+      ],
+      "top1_match": true,
+      "top3_match": true,
+      "expected_keywords": [
+        "status",
+        "indexed",
+        "metrics"
+      ],
+      "keyword_recall": 1.0
+    }
+  ],
+  "CosineOverlap": [
+    {
+      "question": "How does the chatbot learn about new information over time?",
+      "expected_source": "company-handbook",
+      "retrieved_sources": [
+        "company-handbook",
+        "company-handbook",
+        "security-playbook"
+      ],
+      "top1_match": true,
+      "top3_match": true,
+      "expected_keywords": [
+        "detect",
+        "change",
+        "re-embed",
+        "retrieval"
+      ],
+      "keyword_recall": 1.0
+    },
+    {
+      "question": "Can the system refresh the knowledge base automatically as well as manually?",
+      "expected_source": "product-updates",
+      "retrieved_sources": [
+        "product-updates",
+        "company-handbook",
+        "security-playbook"
+      ],
+      "top1_match": true,
+      "top3_match": true,
+      "expected_keywords": [
+        "scheduled",
+        "polling",
+        "manually",
+        "admin"
+      ],
+      "keyword_recall": 1.0
+    },
+    {
+      "question": "What headers protect public chat access and admin operations?",
+      "expected_source": "security-playbook",
+      "retrieved_sources": [
+        "security-playbook",
+        "company-handbook",
+        "company-handbook"
+      ],
+      "top1_match": true,
+      "top3_match": true,
+      "expected_keywords": [
+        "x-api-key",
+        "x-admin-key"
+      ],
+      "keyword_recall": 0.5
+    },
+    {
+      "question": "What happens if the language model is down?",
+      "expected_source": "security-playbook",
+      "retrieved_sources": [
+        "security-playbook",
+        "security-playbook",
+        "company-handbook"
+      ],
+      "top1_match": true,
+      "top3_match": true,
+      "expected_keywords": [
+        "fallback",
+        "retrieval-only"
+      ],
+      "keyword_recall": 0.5
+    },
+    {
+      "question": "What operational data can users inspect from the service?",
+      "expected_source": "product-updates",
+      "retrieved_sources": [
+        "product-updates",
+        "product-updates",
+        "security-playbook"
+      ],
+      "top1_match": true,
+      "top3_match": true,
+      "expected_keywords": [
+        "status",
+        "indexed",
+        "metrics"
+      ],
+      "keyword_recall": 0.667
+    }
+  ]
+}

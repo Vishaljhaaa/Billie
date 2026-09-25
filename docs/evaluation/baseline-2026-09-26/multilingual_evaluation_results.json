@@ -1,0 +1,64 @@
+{
+  "samples": 8,
+  "language_accuracy": 1.0,
+  "cross_lingual_retrieval_term_recall": 1.0,
+  "details": [
+    {
+      "text": "How do I update the knowledge base?",
+      "expected": "en",
+      "predicted": "en",
+      "language_ok": true,
+      "terms_ok": true
+    },
+    {
+      "text": "Where to report security?",
+      "expected": "en",
+      "predicted": "en",
+      "language_ok": true,
+      "terms_ok": true
+    },
+    {
+      "text": "How to sync data?",
+      "expected": "en",
+      "predicted": "en",
+      "language_ok": true,
+      "terms_ok": true
+    },
+    {
+      "text": "How to update knowledge?",
+      "expected": "en",
+      "predicted": "en",
+      "language_ok": true,
+      "terms_ok": true
+    },
+    {
+      "text": "Please update the base",
+      "expected": "en",
+      "predicted": "en",
+      "language_ok": true,
+      "terms_ok": true
+    },
+    {
+      "text": "How can I report?",
+      "expected": "en",
+      "predicted": "en",
+      "language_ok": true,
+      "terms_ok": true
+    },
+    {
+      "text": "Where is the security playbook?",
+      "expected": "en",
+      "predicted": "en",
+      "language_ok": true,
+      "terms_ok": true
+    },
+    {
+      "text": "Update the product notes",
+      "expected": "en",
+      "predicted": "en",
+      "language_ok": true,
+      "terms_ok": true
+    }
+  ],
+  "note": "This evaluates deterministic language detection and retrieval-term normalization. Set MULTILINGUAL_TRANSLATION_BACKEND=nllb to use the optional open-source NLLB full-sentence translation backend."
+}

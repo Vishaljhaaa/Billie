@@ -1,0 +1,22 @@
+[
+  {
+    "model": "TextOnlyFallback",
+    "avg_keyword_recall": 0.0,
+    "clarification_accuracy": 0.75,
+    "grounded_rate": 0.0,
+    "evaluation_status": "completed_with_available_assets",
+    "missing_image_paths": []
+  },
+  {
+    "model": "MultimodalReasoner",
+    "avg_keyword_recall": 0.0,
+    "clarification_accuracy": 0.75,
+    "grounded_rate": 0.5,
+    "evaluation_status": "blocked_missing_image_assets",
+    "missing_image_paths": [
+      "C:\\Users\\max03\\Downloads\\project\\dataset\\visual_cases\\dual_schedule.png",
+      "C:\\Users\\max03\\Downloads\\project\\dataset\\visual_cases\\release_board.png",
+      "C:\\Users\\max03\\Downloads\\project\\dataset\\visual_cases\\security_alert.png"
+    ]
+  }
+]

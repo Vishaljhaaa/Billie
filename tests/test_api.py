@@ -4,8 +4,13 @@ from pathlib import Path
 
 from fastapi.testclient import TestClient
 
+from app.arxiv_expert import ArxivExpertService
 from app.config import AppConfig, AuthConfig, LLMConfig, SourceConfig
 from app.main import build_services, create_app
+from app.medical_qa import MedicalQAService
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
 class InMemoryVectorStore:
@@ -47,9 +52,24 @@ def make_config(tmp_path: Path) -> AppConfig:
     )
 
 
+def build_test_services(config: AppConfig):
+    return build_services(
+        config,
+        vector_store=InMemoryVectorStore(),
+        medical_service=MedicalQAService.from_dataset(
+            PROJECT_ROOT / "dataset" / "does-not-exist",
+            fallback_sample_path=PROJECT_ROOT / "dataset" / "medquad_sample" / "sample_medquad_records.json",
+        ),
+        arxiv_service=ArxivExpertService.from_dataset(
+            PROJECT_ROOT / "dataset" / "arxiv" / "missing.json",
+            fallback_sample_path=PROJECT_ROOT / "dataset" / "arxiv_sample" / "sample_arxiv_cs.jsonl",
+        ),
+    )
+
+
 def test_api_auth_and_admin_status(tmp_path: Path):
     config = make_config(tmp_path)
-    services = build_services(config, vector_store=InMemoryVectorStore())
+    services = build_test_services(config)
     app = create_app(config, services=services, run_scheduler=False)
 
     with TestClient(app) as client:
@@ -78,7 +98,7 @@ def test_api_auth_and_admin_status(tmp_path: Path):
 
 def test_api_uses_the_same_chat_endpoint_for_medical_and_research_modes(tmp_path: Path):
     config = make_config(tmp_path)
-    services = build_services(config, vector_store=InMemoryVectorStore())
+    services = build_test_services(config)
     app = create_app(config, services=services, run_scheduler=False)
 
     with TestClient(app) as client:

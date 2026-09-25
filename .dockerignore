@@ -1,7 +1,6 @@
 __pycache__
 .venv
 data
-dataset
 artifacts
 *.pyc
 *.pyo
@@ -9,3 +8,13 @@ artifacts
 env/
 venv/
 .pytest_cache
+.env
+.env.*
+!.env.example
+dataset/*
+!dataset/medquad_sample/
+!dataset/arxiv_sample/
+dataset/medquad_sample/*
+!dataset/medquad_sample/sample_medquad_records.json
+dataset/arxiv_sample/*
+!dataset/arxiv_sample/sample_arxiv_cs.jsonl

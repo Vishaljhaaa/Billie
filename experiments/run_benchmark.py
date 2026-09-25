@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import math
 import sys
+import argparse
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -19,7 +20,7 @@ from app.sources import SourceLoader
 from app.text_utils import chunk_text
 
 DATASET_PATH = PROJECT_ROOT / "experiments" / "benchmark_dataset.json"
-RESULTS_DIR = PROJECT_ROOT / "artifacts"
+RESULTS_DIR = PROJECT_ROOT / "docs" / "evaluation" / "baseline-2026-09-26"
 
 
 def tokenize(text: str) -> list[str]:
@@ -98,21 +99,36 @@ def keyword_recall(text: str, expected_keywords: list[str]) -> float:
     return hits / max(1, len(expected_keywords))
 
 
-def evaluate(name: str, retriever, benchmark_rows: list[dict[str, object]]) -> dict[str, float | str]:
+def evaluate(name: str, retriever, benchmark_rows: list[dict[str, object]]) -> dict[str, object]:
     top1_hits = 0
     top3_hits = 0
     keyword_recalls: list[float] = []
+    per_query: list[dict[str, object]] = []
 
     for row in benchmark_rows:
         results = retriever.search(str(row["question"]), top_k=3)
         source_ids = [chunk.source_id for chunk in results]
         expected_source = str(row["expected_source"])
-        if source_ids[:1] == [expected_source]:
+        top1_match = source_ids[:1] == [expected_source]
+        top3_match = expected_source in source_ids
+        if top1_match:
             top1_hits += 1
-        if expected_source in source_ids:
+        if top3_match:
             top3_hits += 1
         combined_text = " ".join(chunk.text for chunk in results)
-        keyword_recalls.append(keyword_recall(combined_text, list(row["expected_keywords"])))
+        query_keyword_recall = keyword_recall(combined_text, list(row["expected_keywords"]))
+        keyword_recalls.append(query_keyword_recall)
+        per_query.append(
+            {
+                "question": row["question"],
+                "expected_source": expected_source,
+                "retrieved_sources": source_ids,
+                "top1_match": top1_match,
+                "top3_match": top3_match,
+                "expected_keywords": row["expected_keywords"],
+                "keyword_recall": round(query_keyword_recall, 3),
+            }
+        )
 
     total = len(benchmark_rows)
     return {
@@ -120,10 +136,17 @@ def evaluate(name: str, retriever, benchmark_rows: list[dict[str, object]]) -> d
         "top1_accuracy": round(top1_hits / total, 3),
         "top3_accuracy": round(top3_hits / total, 3),
         "avg_keyword_recall": round(sum(keyword_recalls) / total, 3),
+        "per_query": per_query,
     }
 
 
-def save_bar_chart(title: str, results: list[dict[str, float | str]], metric: str, output_name: str) -> None:
+def save_bar_chart(
+    title: str,
+    results: list[dict[str, object]],
+    metric: str,
+    output_name: str,
+    output_dir: Path,
+) -> None:
     models = [str(item["model"]) for item in results]
     values = [float(item[metric]) for item in results]
 
@@ -135,12 +158,13 @@ def save_bar_chart(title: str, results: list[dict[str, float | str]], metric: st
     for bar, value in zip(bars, values, strict=False):
         plt.text(bar.get_x() + bar.get_width() / 2, value + 0.02, f"{value:.2f}", ha="center")
     plt.tight_layout()
-    plt.savefig(RESULTS_DIR / output_name, dpi=180)
+    plt.savefig(output_dir / output_name, dpi=180)
     plt.close()
 
 
-def run() -> None:
-    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+def run(results_dir: Path | None = None) -> list[dict[str, object]]:
+    output_dir = results_dir or RESULTS_DIR
+    output_dir.mkdir(parents=True, exist_ok=True)
     config = AppConfig.load(PROJECT_ROOT / "sources.json")
     benchmark_rows = json.loads(DATASET_PATH.read_text(encoding="utf-8"))
 
@@ -185,23 +209,30 @@ def run() -> None:
         evaluate("CosineOverlap", CosineRetriever(improved_chunks), benchmark_rows),
     ]
 
-    (RESULTS_DIR / "benchmark_results.json").write_text(
+    per_query = {str(result["model"]): result.pop("per_query") for result in results}
+    (output_dir / "retrieval_results.json").write_text(
         json.dumps(results, indent=2),
         encoding="utf-8",
     )
+    (output_dir / "retrieval_per_query.json").write_text(json.dumps(per_query, indent=2), encoding="utf-8")
     save_bar_chart(
         "Retriever Top-1 Accuracy Comparison",
         results,
         metric="top1_accuracy",
         output_name="retriever_top1_accuracy.png",
+        output_dir=output_dir,
     )
     save_bar_chart(
         "Retriever Keyword Recall Comparison",
         results,
         metric="avg_keyword_recall",
         output_name="retriever_keyword_recall.png",
+        output_dir=output_dir,
     )
+    return results
 
 
 if __name__ == "__main__":
-    run()
+    parser = argparse.ArgumentParser(description="Run the offline source retrieval benchmark.")
+    parser.add_argument("--results-dir", type=Path, default=RESULTS_DIR)
+    run(parser.parse_args().results_dir)

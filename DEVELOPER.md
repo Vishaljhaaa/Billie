@@ -3,8 +3,8 @@
 This file summarizes the project's runtime entrypoints, module responsibilities, and quick local run/checklist.
 
 ## Entrypoints
-- `app/main.py`: FastAPI app factory (`create_app()`). Run with Uvicorn: `uvicorn app.main:app --reload`.
-- `streamlit_app.py`: Streamlit UI app. Run with: `streamlit run streamlit_app.py`.
+- `app/main.py`: FastAPI app factory (`create_app()`). Run with Uvicorn: `python -m uvicorn app.main:create_app --factory --reload`.
+- `streamlit_app.py`: separate Streamlit UI app. Run with: `python -m streamlit run streamlit_app.py`.
 - `experiments/*.py`: CLI experiment scripts (benchmark, multilingual, sentiment, multimodal).
 
 ## Key Modules & Responsibilities
@@ -30,13 +30,18 @@ This file summarizes the project's runtime entrypoints, module responsibilities,
   - `VECTOR_STORE_BACKEND=local` to force JSON local store
 
 ## Quick Local Checklist
-1. Create & activate a venv (the workspace provides `.venv` in this environment).
+1. Install Python 3.12, then create and activate a project virtual environment:
+```
+py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
 2. Install deps:
 ```
+python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 3. (Optional) For Chroma: `pip install -r requirements-chroma.txt`.
-4. Ensure NLTK WordNet data is present:
+4. NLTK WordNet is optional. Without it, tokenization runs without lemmatization. To install it when network access is available:
 ```
 python -m nltk.downloader wordnet
 ```
@@ -44,17 +49,19 @@ python -m nltk.downloader wordnet
 ```
 python -m pytest -q
 ```
-6. Run the FastAPI app:
+6. Run the FastAPI app (factory):
 ```
-uvicorn app.main:create_app --factory --reload
+python -m uvicorn app.main:create_app --factory --host 127.0.0.1 --port 8000
 ```
 7. Run the Streamlit UI:
 ```
-streamlit run streamlit_app.py
+python -m streamlit run streamlit_app.py
 ```
 
+The Dockerfile runs only the FastAPI service. It includes the small MedQuAD and arXiv sample fallbacks; full corpora are not copied into the image. Docker build and runtime were not verified on the audit machine because Docker is unavailable.
+
 ## Troubleshooting Tips
-- If tests show `LookupError` from NLTK, run the `nltk.downloader` command above.
+- If retrieval behavior differs between machines, record whether WordNet data is installed; preprocessing intentionally falls back to tokenization without lemmatization.
 - If vector results are empty, confirm `VECTOR_STORE_BACKEND` and that `data/chroma` or configured `vector_store_dir` is writable.
 - The LLM and vision paths are optional and guarded by `config.llm.enabled` and presence of sidecar JSON files.
 

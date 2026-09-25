@@ -1,0 +1,44 @@
+{
+  "release-thread": [
+    {
+      "question": "When does the public beta start for Asteria Notes?",
+      "answer": "Image supplied at C:\\Users\\max03\\Downloads\\project\\dataset\\visual_cases\\release_board.png, but no extractor was available.",
+      "sources": [
+        "C:\\Users\\max03\\Downloads\\project\\dataset\\visual_cases\\release_board.png"
+      ],
+      "visual_summaries": [
+        "Image supplied at C:\\Users\\max03\\Downloads\\project\\dataset\\visual_cases\\release_board.png, but no extractor was available."
+      ]
+    }
+  ],
+  "security-thread": [
+    {
+      "question": "Where should I report OTP phishing?",
+      "answer": "I could not find a confirmed phishing-reporting channel in the indexed sources.",
+      "sources": [
+        "C:\\Users\\max03\\Downloads\\project\\dataset\\visual_cases\\security_alert.png"
+      ],
+      "visual_summaries": [
+        "Image supplied at C:\\Users\\max03\\Downloads\\project\\dataset\\visual_cases\\security_alert.png, but no extractor was available."
+      ]
+    },
+    {
+      "question": "Can you repeat the reporting email?",
+      "answer": "I could not find a confirmed phishing-reporting channel in the indexed sources.",
+      "sources": [],
+      "visual_summaries": []
+    }
+  ],
+  "ambiguous-thread": [
+    {
+      "question": "What launch date is shown in the image?",
+      "answer": "Image supplied at C:\\Users\\max03\\Downloads\\project\\dataset\\visual_cases\\dual_schedule.png, but no extractor was available.",
+      "sources": [
+        "C:\\Users\\max03\\Downloads\\project\\dataset\\visual_cases\\dual_schedule.png"
+      ],
+      "visual_summaries": [
+        "Image supplied at C:\\Users\\max03\\Downloads\\project\\dataset\\visual_cases\\dual_schedule.png, but no extractor was available."
+      ]
+    }
+  ]
+}

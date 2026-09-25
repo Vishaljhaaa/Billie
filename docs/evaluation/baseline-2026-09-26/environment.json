@@ -1,0 +1,50 @@
+{
+  "snapshot_date": "2026-09-26",
+  "operating_system": "Windows",
+  "python": "CPython 3.12.10 64-bit",
+  "primary_requirements": {
+    "beautifulsoup4": "4.12.3",
+    "fastapi": "0.115.0",
+    "httpx": "0.27.2",
+    "matplotlib": "3.9.2",
+    "nltk": "3.9.1",
+    "prometheus-client": "0.21.0",
+    "pydantic": "2.9.2",
+    "pytest": "8.3.3",
+    "python-dotenv": "1.0.1",
+    "streamlit": "1.43.0",
+    "uvicorn": "0.30.6"
+  },
+  "matplotlib_backend": "Agg",
+  "vector_store_backend": "local",
+  "nltk_wordnet_data_available": false,
+  "optional_paths_exercised": {
+    "chromadb_and_sentence_transformers": false,
+    "openai_compatible_llm_or_vision": false,
+    "ollama": false,
+    "nllb": false
+  },
+  "docker_available": false,
+  "api_factory_smoke": {
+    "command": "python -m uvicorn app.main:create_app --factory --host 127.0.0.1 --port 8877",
+    "result": "started; /health returned ok; sample-backed medical and research POST /chat returned HTTP 200 with sources",
+    "scope": "disposable sample-only project copy; local vector-store backend"
+  },
+  "pytest_result": {
+    "passed": 29,
+    "failed": 0,
+    "skipped": 0,
+    "errors": 0,
+    "warnings": 15,
+    "duration_seconds": 9.35
+  },
+  "evaluation_sample_counts": {
+    "retrieval_queries": 5,
+    "sentiment_examples": 10,
+    "language_examples": 8,
+    "multimodal_rows": 4,
+    "multimodal_png_assets_referenced": 3,
+    "multimodal_png_assets_present": 0
+  },
+  "historical_artifacts_overwritten": false
+}

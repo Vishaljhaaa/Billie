@@ -1,63 +1,72 @@
-# Multimodal Knowledge Assistant
+# Billie: Multimodal Knowledge Assistant
 
-A retrieval-augmented, multimodal knowledge assistant implemented in Python. It ingests trusted sources, incrementally indexes changed content, and serves evidence-backed answers using retrieved text, image sidecars, and optional LLM synthesis.
+Billie is an existing Python retrieval-augmented assistant with a FastAPI API, a separate Streamlit UI, a general knowledge mode, and dataset-backed medical and arXiv research modes. It includes optional integrations for Chroma, OpenAI-compatible models, Ollama, and NLLB; these are not required for the offline test suite.
 
-Quick highlights
-- FastAPI backend with modular services and simple auth guards (`app/main.py`).
-- Streamlit demo UI (`streamlit_app.py`).
-- Vector-store abstraction supporting Chroma (optional) or a local JSON fallback (`app/vector_store.py`).
-- Domain modules for medical QA (MedQuAD) and arXiv research retrieval.
-- Tests with `pytest` and example experiment scripts under `experiments/`.
+## Python 3.12 Setup
 
-Why include this on your resume
-- Demonstrates system design, data ingestion pipelines, retrieval/IR concepts, and production integration patterns (metrics, retries, fallback strategies).  
-- Shows ability to integrate third-party services (LLMs, vector DBs) and handle multimodal inputs (images + text).
+Create a virtual environment from the repository root and install the pinned primary dependencies:
 
-Resume-ready bullets (pick one or two tailored to role):
-- "Built a retrieval-augmented multimodal assistant (FastAPI + Streamlit) with incremental fingerprint-based indexing, pluggable vector-store (Chroma/local), session memory, and evidence-grounded response validation."
-- "Implemented a production-focused ingestion pipeline (fingerprinting, chunking, sqlite-backed source state), Prometheus metrics, and full unit tests covering retrieval, multimodal reasoning, and dataset-based QA."
-
-Local quickstart
-1. Create a virtual environment and install dependencies:
-```bash
-python -m venv .venv
-.\.venv\Scripts\activate
+```powershell
+py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
-2. Install optional backends if desired:
-```bash
-pip install -r requirements-chroma.txt   # optional Chroma + sentence-transformers
-pip install -r requirements-multilingual.txt  # optional multilingual translation (NLLB)
-```
-3. Ensure NLTK WordNet is available (used by preprocessing):
-```bash
-python scripts/setup_nltk.py
-```
-4. Run the included demo (no external LLM required):
-```bash
-python scripts/demo_chat.py
+
+NLTK WordNet data is optional. If it is unavailable, preprocessing falls back to lowercase tokenization without lemmatization. This keeps tests usable offline but may change retrieval/evaluation results; record the resource state when comparing runs.
+
+## Run Tests
+
+```powershell
+$env:MPLBACKEND = "Agg"
+python -m pytest -q
 ```
 
-Example demo output
+`tests/conftest.py` also selects Matplotlib's non-interactive `Agg` backend; CI sets the same backend. Evaluation tests write only to temporary directories and do not overwrite the historical files under `artifacts/`.
+
+## Run The Applications
+
+Start the FastAPI service using the factory defined in `app/main.py`:
+
+```powershell
+python -m uvicorn app.main:create_app --factory --host 127.0.0.1 --port 8000
 ```
 
-Run the service
-- FastAPI (production / local dev):
-```bash
-uvicorn app.main:create_app --factory --reload
+Run the Streamlit UI separately in another terminal:
+
+```powershell
+python -m streamlit run streamlit_app.py
 ```
-- Streamlit demo UI:
-```bash
-streamlit run streamlit_app.py
 
-Repository notes
-- See `DEVELOPER.md` for a more detailed developer-oriented guide.
+The Dockerfile starts only FastAPI on port 8000. Docker build/runtime has not been verified on this machine because Docker is unavailable. The build context excludes `.env`, mutable `data/`, the full MedQuAD corpus, and the multi-gigabyte arXiv snapshot; it allows only the small medical and arXiv samples. Full datasets must be mounted/provided separately. If optional samples are absent, those domain modes return their existing no-records responses; the general assistant does not depend on them.
 
-Next improvements (suggestions to make before public GitHub):
-- Add a `Dockerfile` + `docker-compose` to simplify local demos and CI.  
-- Add GitHub Actions to run tests / lint on push.  
-- Include a short demo screencast and sample dataset indices in `artifacts/` for quick evaluation.
-# Multimodal Knowledge Assistant
+To build and run the API image on a machine with Docker:
+
+```powershell
+docker build -t billie:local .
+docker run --rm -p 8000:8000 --env-file .env billie:local
+```
+
+Only include `.env` at runtime, never in the build context. Configure API/admin keys for protected use.
+
+## Reproduce Offline Evaluations
+
+All scripts default to `docs/evaluation/baseline-2026-09-26/`, leaving historical artifacts unchanged. Pass `--results-dir <path>` to select another output directory.
+
+```powershell
+$env:MPLBACKEND = "Agg"
+$env:VECTOR_STORE_BACKEND = "local"
+python experiments/run_benchmark.py --results-dir docs/evaluation/baseline-2026-09-26
+python experiments/run_sentiment_evaluation.py --results-dir docs/evaluation/baseline-2026-09-26
+python experiments/run_multilingual_evaluation.py --results-dir docs/evaluation/baseline-2026-09-26
+python experiments/run_multimodal_benchmark.py --results-dir docs/evaluation/baseline-2026-09-26
+```
+
+The current multimodal dataset references image files that are absent from this checkout. Its result is marked `blocked_missing_image_assets` and is not evidence of image-understanding quality. The language evaluation currently has eight English-only examples; its result does not measure non-English accuracy. See [the versioned baseline report](docs/evaluation/baseline-2026-09-26/REPORT.md) for commands, versions, per-query details, metrics and blockers.
+
+## Optional Backends
+
+Install Chroma/Sentence Transformers from `requirements-chroma.txt` to request the Chroma vector store. Install `requirements-multilingual.txt` and set `MULTILINGUAL_TRANSLATION_BACKEND=nllb` to request full-sentence NLLB translation. OpenAI-compatible models require `OPENAI_API_KEY`; research explanations can use a separately running Ollama service. These optional paths are not exercised by the offline test suite.
 
 ## Problem Statement
 
@@ -78,7 +87,7 @@ It includes one unified Streamlit chatbot and one matching `/chat` API, with sel
 
 ## Dataset
 
-The repository uses the original chatbot knowledge corpus plus a small visual extension in the same domain.
+The repository includes the original chatbot knowledge corpus and sample datasets for the two domain modes. The multimodal benchmark's referenced image fixture directory is absent in this checkout.
 
 ### Text knowledge
 
@@ -90,14 +99,9 @@ The repository uses the original chatbot knowledge corpus plus a small visual ex
 
 - `experiments/benchmark_dataset.json`
 
-### Visual benchmark cases
+### Multimodal benchmark
 
-- `dataset/visual_cases/release_board.png`
-- `dataset/visual_cases/security_alert.png`
-- `dataset/visual_cases/dual_schedule.png`
-- `experiments/multimodal_benchmark_dataset.json`
-
-Each visual case also includes a `.json` sidecar with reproducible extracted evidence used for offline evaluation. When an API key is configured, the same pipeline can optionally call a vision-capable OpenAI-compatible model for live image inspection.
+`experiments/multimodal_benchmark_dataset.json` references three files under `dataset/visual_cases/`, but those images and sidecars are not present in this checkout. The current evaluation runner records the missing assets and labels that variant blocked; it does not provide evidence of image-understanding performance. Live image analysis is an optional, unverified OpenAI-compatible path.
 
 ### Medical QA data
 
@@ -111,13 +115,13 @@ The app also includes a small reproducible sample at `dataset/medquad_sample/sam
 
 ### arXiv CS research data
 
-The arXiv expert chatbot is designed for the Kaggle arXiv metadata dataset from `https://www.kaggle.com/datasets/Cornell-University/arxiv`. Place the downloaded metadata file at:
+The arXiv expert can use the Kaggle arXiv metadata dataset from `https://www.kaggle.com/datasets/Cornell-University/arxiv`. The full snapshot is about 5.4 GB and is not required for startup. Place the downloaded metadata file at:
 
 ```text
 dataset/arxiv/arxiv-metadata-oai-snapshot.json
 ```
 
-The app filters to computer science categories such as `cs.CL`, `cs.LG`, `cs.CV`, and `cs.IR`. A small reproducible CS sample is included at `dataset/arxiv_sample/sample_arxiv_cs.jsonl`.
+The app filters to computer science categories such as `cs.CL`, `cs.LG`, `cs.CV`, and `cs.IR`. A small reproducible CS sample is included at `dataset/arxiv_sample/sample_arxiv_cs.jsonl` and is the dataset included in the Docker image.
 
 ## Methodology
 
@@ -273,55 +277,7 @@ The response now includes evidence, validation status, and clarification flags i
 
 ## Experiments
 
-### Retrieval benchmark
-
-Run:
-
-```bash
-python experiments/run_benchmark.py
-```
-
-Outputs:
-
-- `artifacts/benchmark_results.json`
-- `artifacts/retriever_top1_accuracy.png`
-- `artifacts/retriever_keyword_recall.png`
-
-Current results:
-
-| Model | Top-1 Accuracy | Top-3 Accuracy | Avg Keyword Recall |
-|---|---:|---:|---:|
-| KeywordOverlap | 1.00 | 1.00 | 0.800 |
-| CosineOverlap | 1.00 | 1.00 | 0.733 |
-
-### Multimodal benchmark
-
-Run:
-
-```bash
-python experiments/run_multimodal_benchmark.py
-```
-
-Outputs:
-
-- `artifacts/multimodal_benchmark_results.json`
-- `artifacts/multimodal_keyword_recall.png`
-- `artifacts/multimodal_clarification_accuracy.png`
-- `artifacts/multimodal_grounded_rate.png`
-
-Current results:
-
-| Model | Avg Keyword Recall | Clarification Accuracy | Grounded Rate |
-|---|---:|---:|---:|
-| TextOnlyFallback | 0.000 | 0.750 | 0.000 |
-| MultimodalReasoner | 0.625 | 1.000 | 0.750 |
-
-### Key insights
-
-- Retrieval quality from the original training project remains strong on the text benchmark.
-- Adding image evidence materially improves answer quality on visual tasks.
-- Ambiguity detection works reliably on the current benchmark and prevents overconfident answers.
-- Grounded-rate gains show the multimodal pipeline is not just answering more often, but answering with stronger evidence support.
+The offline evaluations are reproducible with `--results-dir` and now emit per-query JSON diagnostics. The current dated run and its limitations are documented in [docs/evaluation/baseline-2026-09-26/REPORT.md](docs/evaluation/baseline-2026-09-26/REPORT.md). The checked-in files in `artifacts/` are historical and are not overwritten by the test suite or the scripts' default output directory.
 
 ## MedQuAD Medical Q&A
 
@@ -390,32 +346,28 @@ Run:
 python experiments/run_multilingual_evaluation.py
 ```
 
-This writes `artifacts/multilingual_evaluation_results.json` with language-detection accuracy and cross-lingual retrieval-term recall over English, Spanish, Hindi, Bengali, and mixed-language examples.
+This writes to the dated baseline directory by default. The current eight-row dataset contains English-only examples, so it measures neither non-English language detection nor translation quality.
 
 ## Testing
 
-Run the full suite:
+Run the full Python 3.12 suite:
 
 ```bash
-python -m pytest
+python -m pytest -q
 ```
 
-Fast local core status:
-
-- `18 passed` for the chatbot, MedQuAD, arXiv, multilingual, sentiment, and evaluation tests.
-- The API tests currently parse the full MedQuAD corpus during service construction and should be run separately or refactored to inject the sample fixture.
+The test-only `Agg` Matplotlib backend is configured in `tests/conftest.py`. Benchmark/evaluation tests write results to pytest temporary directories. The latest verified result is recorded in the dated baseline report and this project log.
 
 ## Visual Outputs Included
 
-The repo includes submission-ready visuals:
+The repo includes generated benchmark charts under the dated baseline directory:
 
-- benchmark bar charts in `artifacts/`
-- sample multimodal input images in `dataset/visual_cases/`
-- concept graphs and retrieved-paper panels in the arXiv Streamlit app
+- retrieval, sentiment, and multimodal fallback evaluation charts under `docs/evaluation/baseline-2026-09-26/`
+- concept graphs and retrieved-paper panels rendered by the arXiv Streamlit mode
 
 ## Notes
 
-- The offline benchmark uses deterministic visual sidecars for reproducibility.
+- The multimodal benchmark currently has no image fixtures under `dataset/visual_cases/`; its fallback outputs are not image-understanding results.
 - If `OPENAI_API_KEY` is set, the system can also call a vision-capable OpenAI-compatible endpoint for richer live image analysis.
 - The project remains a direct extension of the training chatbot rather than a new unrelated dataset or application.
 - The full MedQuAD dataset is not bundled here by default; place it under `dataset/MedQuAD/` to index the complete collection.
@@ -437,7 +389,7 @@ The repo includes submission-ready visuals:
 - Offline image understanding depends on prepared sidecar evidence; richer live visual interpretation requires a configured `OPENAI_API_KEY`.
 - Ambiguity handling is rule-based and may miss more subtle or complex uncertainty patterns.
 - The response validator is heuristic, so it improves grounding checks but is not equivalent to a formal verifier model.
-- The sample visual inputs are synthetic project artifacts designed for reproducible evaluation rather than a large real-image dataset.
+- Visual benchmark inputs referenced by the dataset are absent from this checkout.
 - The bundled MedQuAD sample is only for smoke testing; full medical QA evaluation should use the complete MedQuAD dataset.
 - The bundled arXiv sample is only for smoke testing; full research coverage requires the Kaggle arXiv metadata dataset.
 - Multilingual support uses local detection and domain-term normalization, not full neural translation by default.

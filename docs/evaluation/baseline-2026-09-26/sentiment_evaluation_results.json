@@ -1,0 +1,24 @@
+{
+  "samples": 10,
+  "accuracy": 0.8,
+  "macro_f1": 0.806,
+  "per_label": {
+    "positive": {
+      "precision": 0.6,
+      "recall": 1.0,
+      "f1": 0.75
+    },
+    "negative": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "neutral": {
+      "precision": 1.0,
+      "recall": 0.5,
+      "f1": 0.667
+    }
+  },
+  "response_appropriateness_rate": 1.0,
+  "assessment": "Appropriateness checks whether negative messages receive empathy, positive messages receive acknowledgement, and neutral messages stay factual. This is a deterministic offline measure, not a real customer-satisfaction study."
+}

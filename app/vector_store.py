@@ -8,6 +8,7 @@ from typing import Any
 
 from app.config import AppConfig
 from app.preprocessing import tokenize_and_lemmatize
+from app.retrieval import BM25Retriever, ReciprocalRankFusion, RetrievalChunk
 
 
 def _tokenize(text: str) -> list[str]:
@@ -88,6 +89,12 @@ class _LocalPersistentVectorStore:
 
 class VectorStore:
     def __init__(self, config: AppConfig) -> None:
+        self.config = config
+        self.retrieval_mode = getattr(config, "retrieval_mode", "legacy").lower()
+        self.bm25_k1 = getattr(config, "bm25_k1", 1.2)
+        self.bm25_b = getattr(config, "bm25_b", 0.75)
+        self.rrf_k = getattr(config, "rrf_k", 60)
+
         backend = os.getenv("VECTOR_STORE_BACKEND", "").lower()
         if backend == "local":
             self._store = _LocalPersistentVectorStore(config.vector_store_dir)
@@ -108,6 +115,88 @@ class VectorStore:
         except Exception:
             self._store = _LocalPersistentVectorStore(config.vector_store_dir)
 
+    def _local_records(self) -> list[dict[str, Any]]:
+        if hasattr(self._store, "_records"):
+            return list(self._store._records)
+        return []
+
+    def _bm25_search(self, query: str, top_k: int) -> list[dict[str, Any]]:
+        records = self._local_records()
+        if not records:
+            return []
+
+        chunks = [
+            RetrievalChunk(
+                chunk_id=str(record.get("id", f"chunk-{index}")),
+                content=str(record.get("content", "")),
+                metadata={
+                    "location": record.get("location", ""),
+                    "source_id": record.get("source_id", ""),
+                    "chunk_index": record.get("chunk_index", index),
+                },
+            )
+            for index, record in enumerate(records)
+        ]
+        retriever = BM25Retriever(chunks, k1=self.bm25_k1, b=self.bm25_b)
+        ranked = retriever.search(query, top_k=top_k)
+        return [
+            {
+                "content": item.chunk.content,
+                "_score": item.score,
+                "metadata": {
+                    **item.chunk.metadata,
+                    "location": item.chunk.metadata.get("location", ""),
+                    "source_id": item.chunk.metadata.get("source_id", ""),
+                    "chunk_index": item.chunk.metadata.get("chunk_index", 0),
+                },
+            }
+            for item in ranked
+        ]
+
+    def _hybrid_search(self, query: str, top_k: int) -> list[dict[str, Any]]:
+        records = self._local_records()
+        if not records:
+            return []
+
+        chunks = [
+            RetrievalChunk(
+                chunk_id=str(record.get("id", f"chunk-{index}")),
+                content=str(record.get("content", "")),
+                metadata={
+                    "location": record.get("location", ""),
+                    "source_id": record.get("source_id", ""),
+                    "chunk_index": record.get("chunk_index", index),
+                },
+            )
+            for index, record in enumerate(records)
+        ]
+        ranked_bm25 = BM25Retriever(chunks, k1=self.bm25_k1, b=self.bm25_b).search(query, top_k=max(10, top_k))
+        legacy = [
+            {
+                "content": chunk.content,
+                "_score": 1.0,
+                "metadata": {**chunk.metadata},
+            }
+            for chunk in chunks
+        ]
+        local_ranked = []
+        for record in records:
+            content = str(record.get("content", ""))
+            if not content:
+                continue
+            local_ranked.append(
+                type("_Match", (), {"chunk": RetrievalChunk(chunk_id=str(record.get("id", "unknown")), content=content, metadata={"location": record.get("location", ""), "source_id": record.get("source_id", ""), "chunk_index": record.get("chunk_index", 0)}), "rank": 1, "score": 0.5, "retriever": "local"})
+            )
+        fused = ReciprocalRankFusion(rrf_k=self.rrf_k).fuse([ranked_bm25, local_ranked], top_k=top_k)
+        return [
+            {
+                "content": item.chunk.content,
+                "_score": item.score,
+                "metadata": {**item.chunk.metadata},
+            }
+            for item in fused
+        ]
+
     def replace_source_chunks(self, source_id: str, chunks: list[str], location: str) -> None:
         if hasattr(self._store, "get") and hasattr(self._store, "delete") and hasattr(self._store, "add"):
             existing = self._store.get(where={"source_id": source_id})
@@ -126,6 +215,11 @@ class VectorStore:
         self._store.replace_source_chunks(source_id, chunks, location)
 
     def search(self, query: str, top_k: int) -> list[dict[str, Any]]:
+        if self.retrieval_mode == "bm25":
+            return self._bm25_search(query, top_k)
+        if self.retrieval_mode in {"hybrid", "hybrid_rerank"}:
+            return self._hybrid_search(query, top_k)
+
         if hasattr(self._store, "query"):
             result = self._store.query(query_texts=[query], n_results=top_k)
             documents = result.get("documents", [[]])[0]
@@ -141,5 +235,8 @@ class VectorStore:
                 }
                 for document, metadata, distance in zip(documents, metadatas, distances, strict=False)
             ]
+
+        if hasattr(self._store, "_records"):
+            return self._store.search(query, top_k)
 
         return self._store.search(query, top_k)

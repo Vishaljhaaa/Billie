@@ -1,6 +1,10 @@
 from __future__ import annotations
 
+from pathlib import Path
+
+from app.config import AppConfig
 from app.retrieval import BM25Retriever, RetrievalChunk
+from app.vector_store import VectorStore
 
 
 def chunk(chunk_id: str, content: str) -> RetrievalChunk:
@@ -56,3 +60,33 @@ def test_bm25_document_length_normalization_and_tie_breaking():
 
     assert [item.chunk.chunk_id for item in results] == ["a-short", "b-short", "z-long"]
     assert results[0].score == results[1].score > results[2].score
+
+
+def test_vector_store_uses_bm25_when_retrieval_mode_is_selected(tmp_path: Path):
+    config = AppConfig(
+        poll_interval_minutes=60,
+        chunk_size=100,
+        chunk_overlap=10,
+        top_k=3,
+        memory_window=4,
+        vector_store_dir=tmp_path / "chroma",
+        metadata_db_path=tmp_path / "state.db",
+        session_store_path=tmp_path / "sessions.json",
+        source_timeout_seconds=5,
+        source_max_retries=2,
+        source_retry_backoff_seconds=0.0,
+        llm=None,
+        auth=None,
+        sources=[],
+        retrieval_mode="bm25",
+        bm25_k1=1.2,
+        bm25_b=0.75,
+        rrf_k=60,
+    )
+    vector_store = VectorStore(config)
+    vector_store.replace_source_chunks("doc", ["rare", "rare common"], "fixture.txt")
+
+    results = vector_store.search("rare", top_k=2)
+
+    assert [item["content"] for item in results] == ["rare", "rare common"]
+    assert results[0]["_score"] >= results[1]["_score"]

@@ -1,0 +1,29 @@
+{
+  "dataset_id": "billie-retrieval-v1",
+  "version": "review-prep",
+  "dataset_status": "diagnostic_only",
+  "review_status": "not_independently_reviewed",
+  "frozen": false,
+  "validated": false,
+  "source_scope": [
+    "company-handbook",
+    "product-updates",
+    "security-playbook"
+  ],
+  "external_sources_excluded": [
+    "python-news"
+  ],
+  "reviewer_decisions_file": "experiments/datasets/retrieval-v1/review/reviewer_decisions.jsonl",
+  "final_adjudication": {
+    "status": "pending",
+    "reviewer_count": 0,
+    "notes": "Final adjudication is intentionally pending. Reviewer decisions are recorded separately and never overwrite the original labels in queries.jsonl or metadata.json."
+  },
+  "snapshot_manifest": "experiments/datasets/retrieval-v1/source-snapshots/snapshot_manifest.json",
+  "limitations": [
+    "The dataset remains diagnostic-only until a second reviewer confirms labels or the project explicitly accepts single-reviewer status.",
+    "The three approved local files are the only allowed source corpus for this version.",
+    "Python-news remains excluded until a byte-identical, hash-verified snapshot is archived and explicitly approved.",
+    "The original queries.jsonl and metadata.json were preserved and not modified."
+  ]
+}

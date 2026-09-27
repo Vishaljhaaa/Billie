@@ -50,9 +50,13 @@ class AppConfig:
     source_timeout_seconds: float
     source_max_retries: int
     source_retry_backoff_seconds: float
-    llm: LLMConfig
-    auth: AuthConfig
-    sources: list[SourceConfig]
+    llm: LLMConfig | None = None
+    auth: AuthConfig | None = None
+    sources: list[SourceConfig] | None = None
+    retrieval_mode: str = "legacy"
+    bm25_k1: float = 1.2
+    bm25_b: float = 0.75
+    rrf_k: int = 60
 
     @classmethod
     def load(cls, path: str | Path = "sources.json") -> "AppConfig":
@@ -93,4 +97,8 @@ class AppConfig:
                 admin_key=os.getenv("CHATBOT_ADMIN_API_KEY"),
             ),
             sources=sources,
+            retrieval_mode=os.getenv("RETRIEVAL_MODE", "legacy").lower(),
+            bm25_k1=float(os.getenv("BM25_K1", "1.2")),
+            bm25_b=float(os.getenv("BM25_B", "0.75")),
+            rrf_k=int(os.getenv("RRF_K", "60")),
         )

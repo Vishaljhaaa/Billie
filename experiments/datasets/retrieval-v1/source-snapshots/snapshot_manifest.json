@@ -1,0 +1,33 @@
+﻿{
+    "dataset_id":  "billie-retrieval-v1",
+    "version":  "review-prep",
+    "created_on":  "2026-09-27",
+    "source_scope":  "three approved local files only",
+    "review_status":  "diagnostic_only; independent_human_review_pending",
+    "sources":  [
+                    {
+                        "source_id":  "company-handbook",
+                        "source_path":  "knowledge\\company_handbook.txt",
+                        "archived_path":  "experiments\\datasets\\retrieval-v1\\source-snapshots\\company_handbook.txt",
+                        "sha256":  "13A0D2D6A4EADB5745EDD9D7CF4B8368371E6EA399E4A3AC4B875BDCE343F358",
+                        "bytes":  338,
+                        "review_status":  "diagnostic_only; independent_human_review_pending"
+                    },
+                    {
+                        "source_id":  "security-playbook",
+                        "source_path":  "knowledge\\security_playbook.txt",
+                        "archived_path":  "experiments\\datasets\\retrieval-v1\\source-snapshots\\security_playbook.txt",
+                        "sha256":  "A09A1B30B2DA005FC82D4EF63A341B1D197E7D31B5CF8D0A9394CABE7CF610EA",
+                        "bytes":  469,
+                        "review_status":  "diagnostic_only; independent_human_review_pending"
+                    },
+                    {
+                        "source_id":  "product-updates",
+                        "source_path":  "knowledge\\product_updates.txt",
+                        "archived_path":  "experiments\\datasets\\retrieval-v1\\source-snapshots\\product_updates.txt",
+                        "sha256":  "E8BB0C518BA5CA9B3F78378812BF602928E2C362B9741D2D39146A36E3D1CEBD",
+                        "bytes":  428,
+                        "review_status":  "diagnostic_only; independent_human_review_pending"
+                    }
+                ]
+}

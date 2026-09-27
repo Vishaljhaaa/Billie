@@ -15,15 +15,19 @@
   ],
   "reviewer_decisions_file": "experiments/datasets/retrieval-v1/review/reviewer_decisions.jsonl",
   "final_adjudication": {
-    "status": "pending",
+    "status": "in_review",
     "reviewer_count": 0,
-    "notes": "Final adjudication is intentionally pending. Reviewer decisions are recorded separately and never overwrite the original labels in queries.jsonl or metadata.json."
+    "notes": "Preliminary owner review is in progress for Q001-Q030; Q024 remains pending adjudication; Q025-Q030 remain preliminary unanswerable decisions within the three-file corpus; the dataset remains diagnostic-only and is not frozen or validated."
   },
   "snapshot_manifest": "experiments/datasets/retrieval-v1/source-snapshots/snapshot_manifest.json",
   "limitations": [
     "The dataset remains diagnostic-only until a second reviewer confirms labels or the project explicitly accepts single-reviewer status.",
     "The three approved local files are the only allowed source corpus for this version.",
     "Python-news remains excluded until a byte-identical, hash-verified snapshot is archived and explicitly approved.",
-    "The original queries.jsonl and metadata.json were preserved and not modified."
+    "The original queries.jsonl and metadata.json were preserved and not modified.",
+    "The review record is still preliminary; the original labels in queries.jsonl remain unchanged.",
+    "Q024 remains unresolved for adjudication and is not treated as a final accepted label.",
+    "No independent human reviewer has approved the dataset as frozen or validated.",
+    "The dataset remains diagnostic-only until final adjudication is complete."
   ]
 }
